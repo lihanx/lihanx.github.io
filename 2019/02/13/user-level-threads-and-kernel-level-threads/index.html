@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="原文: user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018
+
+前言原文由作者Alex Onsman于2018-10-10发表在Tutorialspoint上，是对一个题为User-level threa">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Li Hanxuan">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="用户级线程 与 内核级线程"/>
+    
+
+    <!--Open Graph Description-->
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>用户级线程 与 内核级线程 - Li Hanxuan&#39;s Blog</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Google Analytics -->
+    
+
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
+    
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="首页">
+                    首页
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="时间轴">
+                    时间轴
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/tags" 
+                    title="标签">
+                    标签
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/categories" 
+                    title="分类">
+                    分类
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/about.html" 
+                    title="关于">
+                    关于
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/contact.html" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">用户级线程 与 内核级线程</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2019-02-13</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa "></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+                        <div class="tags-container-vertical">
+                            <div class="tags-sub-container">
+                                <a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a> <a class="fw3 ph1 dib" href="/tags/Thread/">#Thread</a>
+                            </div>
+                        </div>
+                    
+
+                    <!-- Main Post Content -->
+                    <blockquote>
+<p>原文: <a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/user-level-threads-and-kernel-level-threads">user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018</a></p>
+</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>原文由作者Alex Onsman于2018-10-10发表在<a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/">Tutorialspoint</a>上，是对一个题为<a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/user-level-threads-and-kernel-level-threads">User-level threads and Kernel-level threads</a>的问题的回答。<br><br/></p>
+<h2 id="原文翻译"><a href="#原文翻译" class="headerlink" title="原文翻译"></a>原文翻译</h2><p>线程(Thread)是一个可以被调度者独立管理的轻量级进程。它可以通过并行(Parallelism)的方式来提升应用(Application)的性能。</p>
+<p>一个线程像数据段(Data Segment)、代码段文件(Code Segment Files)一样，和与其同级的线程共享信息，然而它拥有自己的寄存器(Registers)、栈(Stack)和计数器(Counter)等等。</p>
+<p>线程的两个主要类别可以分为：<strong>用户级线程</strong> 和 <strong>内核级线程</strong>。如下图所示：</p>
+<p><img src="1.PNG" alt="User-level threads and Kernel-level threads"></p>
+<h3 id="用户级线程-User-Level-Threads"><a href="#用户级线程-User-Level-Threads" class="headerlink" title="用户级线程(User-Level Threads)"></a>用户级线程(User-Level Threads)</h3><p>用户级线程是由用户实现的，系统内核(Kernel)无法意识到它们的存在。对于系统内核来说，用户级线程就像一个单线程的进程一样。用户级线程比内核级线程更轻量(small)并且更快速(faster)，它由程序计数器(Program Counter, PC)、栈(Stack)、寄存器(Registers)和一个小的进程控制块(A Small Process Control Block)表示。并且，用户级线程间的同步(Synchronization)不会牵涉到内核。</p>
+<h4 id="用户级线程的优点："><a href="#用户级线程的优点：" class="headerlink" title="用户级线程的优点："></a>用户级线程的优点：</h4><ol>
+<li>用户级线程的创建比内核级线程更加容易和快速，并且更易于管理；</li>
+<li>用户级线程可以在任何操作系统上运行；</li>
+<li>用户级线程间的切换不会涉及到内核态的权限；</li>
+</ol>
+<h4 id="用户级线程的缺点："><a href="#用户级线程的缺点：" class="headerlink" title="用户级线程的缺点："></a>用户级线程的缺点：</h4><ol>
+<li>用户级线程实现的多线程应用无法利用处理器的多个核心；</li>
+<li>如果一个用户级线程被阻塞住，那么整个进程就将会阻塞住；</li>
+</ol>
+<h3 id="内核级线程-Kernel-Level-Threads"><a href="#内核级线程-Kernel-Level-Threads" class="headerlink" title="内核级线程(Kernel-Level Threads)"></a>内核级线程(Kernel-Level Threads)</h3><p>内核级线程直接由内核进行使用和管理。整个进程以及其中线程的上下文信息也由内核进行管理。因此，内核级线程相比之下要慢于用户级线程。</p>
+<h4 id="内核级线程的优点："><a href="#内核级线程的优点：" class="headerlink" title="内核级线程的优点："></a>内核级线程的优点：</h4><ol>
+<li>同一个进程的多个内核级线程可以被不同的处理器核心调度；</li>
+<li>内核例程(Kernel Routines)同样可以是多线程的；</li>
+<li>如果一个内核级线程产生了阻塞，同一个进程中的其他线程仍然可以被内核调度；</li>
+</ol>
+<h4 id="内核级线程的缺点："><a href="#内核级线程的缺点：" class="headerlink" title="内核级线程的缺点："></a>内核级线程的缺点：</h4><ol>
+<li>进程中的线程切换需要切换到内核态；</li>
+<li>内核级线程的创建和管理相较于用户级线程更慢；<br/>
+
+
+</li>
+</ol>
+<h2 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h2><p>A thread is a lightweight process that can be managed independently by a scheduler. It improves the application performance using parallelism.</p>
+<p>A thread shares information like data segment, code segment files etc. with its peer threads while it contains its own registers, stack, counter etc.</p>
+<p>The two main types of threads are user-level threads and kernel-level threads. A diagram that demonstrates these is as follows:</p>
+<p><img src="1.PNG" alt="User-level threads and Kernel-level threads"></p>
+<h3 id="User-Level-Threads"><a href="#User-Level-Threads" class="headerlink" title="User - Level Threads"></a>User - Level Threads</h3><p>The user-level threads are implemented by users and the kernel is not aware of the existence of these threads. It handles them as if they were single-threaded processes. User-level threads are small and much faster than kernel level threads. They are represented by a program counter(PC), stack, registers and a small process control block. Also, there is no kernel involvement in synchronization for user-level threads.</p>
+<h4 id="Advantages-of-User-Level-Threads"><a href="#Advantages-of-User-Level-Threads" class="headerlink" title="Advantages of User-Level Threads"></a>Advantages of User-Level Threads</h4><p>Some of the advantages of user-level threads are as follows:</p>
+<ol>
+<li>User-level threads are easier and faster to create than kernel-level threads. They can also be more easily managed.</li>
+<li>User-level threads can be run on any operating system.</li>
+<li>There are no kernel mode privileges required for thread switching in user-level threads.  </li>
+</ol>
+<h4 id="Disadvantages-of-User-Level-Threads"><a href="#Disadvantages-of-User-Level-Threads" class="headerlink" title="Disadvantages of User-Level Threads"></a>Disadvantages of User-Level Threads</h4><p>Some of the disadvantages of user-level threads are as follows:</p>
+<ol>
+<li>Multithreaded applications in user-level threads cannot use multiprocessing to their advantage.</li>
+<li>The entire process is blocked if one user-level thread performs blocking operation.  </li>
+</ol>
+<h3 id="Kernel-Level-Threads"><a href="#Kernel-Level-Threads" class="headerlink" title="Kernel-Level Threads"></a>Kernel-Level Threads</h3><p>Kernel-level threads are handled by the operating system directly and the thread management is done by the kernel. The context information for the process as well as the process threads is all managed by the kernel. Because of this, kernel-level threads are slower than user-level threads.</p>
+<h4 id="Advantages-of-Kernel-Level-Threads"><a href="#Advantages-of-Kernel-Level-Threads" class="headerlink" title="Advantages of Kernel-Level Threads"></a>Advantages of Kernel-Level Threads</h4><p>Some of the advantages of kernel-level threads are as follows:</p>
+<ol>
+<li>Multiple threads of the same process can be scheduled on different processors in kernel-level threads.</li>
+<li>The kernel routines can also be multithreaded.</li>
+<li>If a kernel-level thread is blocked, another thread of the same process can be scheduled by the kernel.  </li>
+</ol>
+<h4 id="Disadvantages-of-Kernel-Level-Threads"><a href="#Disadvantages-of-Kernel-Level-Threads" class="headerlink" title="Disadvantages of Kernel-Level Threads"></a>Disadvantages of Kernel-Level Threads</h4><p>Some of the disadvantages of kernel-level threads are as follows:</p>
+<ol>
+<li>A mode switch to kernel mode is required to transfer control from one thread to another in a process.</li>
+<li>Kernel-level threads are slower to create as well as manage as compared to user-level threads.</li>
+</ol>
+
+                    
+                    <!-- Tags Bottom -->
+                    
+                        <div class="tags-container-bottom">
+                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a> <a class="fw3 ph1 dib" href="/tags/Thread/">#Thread</a>
+                        </div>
+                    
+
+                    <!-- Comments -->
+                    
+
+
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
+    
+        <p>
+            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
+        </p>
+    
+        <p>
+            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
+        </p>
+    
+        <p>
+            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
+        </p>
+    
+        <p>
+            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
+        </p>
+    
+        <p>
+            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                @All right reserved | Design & Hexo <a class="link dim white" target="_blank" rel="noopener" href="http://www.codeblocq.com/">Jonathan Klughertz</a>
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>

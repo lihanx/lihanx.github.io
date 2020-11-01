@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="前言系统调用（System Calls）是受约束的内核入口，允许进程控制内核来完成指定的操作。内核提供了一系列的系统调用API（Application Programming Interface）来完成相关的功能，例如创建进程、执行I/O操作、创建用于进程间通信的管道等。
+关于系统调用，这里需要掌握">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Li Hanxuan">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="Linux系统调用(System Calls)流程"/>
+    
+
+    <!--Open Graph Description-->
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>Linux系统调用(System Calls)流程 - Li Hanxuan&#39;s Blog</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Google Analytics -->
+    
+
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
+    
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="首页">
+                    首页
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="时间轴">
+                    时间轴
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/tags" 
+                    title="标签">
+                    标签
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/categories" 
+                    title="分类">
+                    分类
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/about.html" 
+                    title="关于">
+                    关于
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/contact.html" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">Linux系统调用(System Calls)流程</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2019-12-05</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa "></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+                        <div class="tags-container-vertical">
+                            <div class="tags-sub-container">
+                                <a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a>
+                            </div>
+                        </div>
+                    
+
+                    <!-- Main Post Content -->
+                    <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>系统调用（System Calls）是受约束的内核入口，允许进程控制内核来完成指定的操作。内核提供了一系列的系统调用API（Application Programming Interface）来完成相关的功能，例如创建进程、执行I/O操作、创建用于进程间通信的管道等。</p>
+<p>关于系统调用，这里需要掌握三点基本常识：</p>
+<ul>
+<li><p>系统调用会将处理器的状态由<strong>用户态</strong>（User Mode）转变为<strong>内核态</strong>（Kernel Mode）</p>
+</li>
+<li><p>系统调用的集合是固定的，每一个系统调用由一个唯一的数字标识（这个数字通常对程序是不可见的）</p>
+</li>
+<li><p>系统调用可能包含一系列的参数，用于指定哪些信息需要从用户空间传递到内核空间</p>
+</li>
+</ul>
+<h2 id="系统调用过程分解"><a href="#系统调用过程分解" class="headerlink" title="系统调用过程分解"></a>系统调用过程分解</h2><p>从编程的角度来看，发起一次系统调用和调用一个C函数无异，然而在这背后，一次系统调用包含了很多的步骤。为了清晰的说明整个流程，就以x86-32架构上的实现为例：</p>
+<ol>
+<li><p>应用程序通过调用C库(C Library)中的包装函数(wrapper function)，发起系统调用；</p>
+</li>
+<li><p>这个包装函数必须保证所有的参数对于系统调用是可用的，参数通过栈(Stack)<br>传递给包装函数，但是对于内核来说，需要它们存储在指定的寄存器内，此时包装函数会将这些参数拷贝到这些指定的寄存器内；</p>
+</li>
+<li><p>由于所有系统调用都是以同样的方式进入内核，内核需要用某种方式来区分这些不同的系统调用。因此，包装函数还会拷贝系统调用的数字标识到指定的CPU寄存器(<code>%eax</code>)中；</p>
+</li>
+<li><p>包装函数执行<code>trap</code>机器指令(<code>int 0x80</code>)，将处理器由用户态切换至内核态，并执行<code>0x80</code>位置的系统向量指向的代码；<br>（如今很多x86-32架构实现了<code>sysenter</code>指令，为用户态内核态切换提供了一种更快速的方式。<code>sysenter</code>的支持起始于2.6版本内核和glibc 2.3.2）</p>
+</li>
+<li><p>为了响应这一次调用，内核调用它的<code>system_call()</code>例程(<code>system_call()</code> routine)：<br> a) 将寄存器中的值保存在内核栈中<br> b) 检查系统调用数字标识的合法性<br> c) 根据内核变量<code>sys_call_table</code>找到对应的系统调用服务例程(service routine)。如果它包含了参数，则首先检查参数的合法性，然后继续执行必要的流程。比如修改参数中指定位置的值，并进行用户空间和内核空间的数据传递（I/O操作）。最后，服务例程向<code>system_call()</code>例程返回结果状态<br> d) 从内核栈中恢复寄存器中的值，并将系统调用返回值置入栈中<br> e) 返回到包装函数，并将处理器切换回用户态</p>
+</li>
+<li><p>如果系统调用服务例程(system call service routine)的返回值表示了一个异常(error)，则包装函数将全局变量<code>errno</code>设置为该值。然后包装函数将这个值返回给调用者，用于告知这次系统调用的状态是成功还是失败；</p>
+</li>
+</ol>
+<p><img src="steps_of_a_system_call.png"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li>The Linux Programming Interface [3.1 System Calls]</li>
+</ol>
+
+                    
+                    <!-- Tags Bottom -->
+                    
+                        <div class="tags-container-bottom">
+                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a>
+                        </div>
+                    
+
+                    <!-- Comments -->
+                    
+
+
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
+    
+        <p>
+            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
+        </p>
+    
+        <p>
+            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
+        </p>
+    
+        <p>
+            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
+        </p>
+    
+        <p>
+            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
+        </p>
+    
+        <p>
+            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                @All right reserved | Design & Hexo <a class="link dim white" target="_blank" rel="noopener" href="http://www.codeblocq.com/">Jonathan Klughertz</a>
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>

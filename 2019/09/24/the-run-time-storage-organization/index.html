@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="前言在上一篇总结 垃圾回收入门 中，我的本意是以了解垃圾回收相关概念为主，暂时忽略其他相关的概念。不过，这导致了有一些内容非常的模糊，容易引起疑惑。比如，是所有被创建的对象都需要回收吗？为什么在垃圾回收课题中会经常出现“堆区”的概念？对象在程序运行时到底是如何分配管理的？
+对此，我又向前查找，阅读了">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Li Hanxuan">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="运行时的内存管理"/>
+    
+
+    <!--Open Graph Description-->
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>运行时的内存管理 - Li Hanxuan&#39;s Blog</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Google Analytics -->
+    
+
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
+    
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="首页">
+                    首页
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="时间轴">
+                    时间轴
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/tags" 
+                    title="标签">
+                    标签
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/categories" 
+                    title="分类">
+                    分类
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/about.html" 
+                    title="关于">
+                    关于
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/contact.html" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">运行时的内存管理</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2019-09-24</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa "></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+                        <div class="tags-container-vertical">
+                            <div class="tags-sub-container">
+                                <a class="fw3 ph1 dib" href="/tags/Compilers/">#Compilers</a>
+                            </div>
+                        </div>
+                    
+
+                    <!-- Main Post Content -->
+                    <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在上一篇总结 <a href="./2019-09-22-the-garbage-collection-mechanism">垃圾回收入门</a> 中，我的本意是以了解垃圾回收相关概念为主，暂时忽略其他相关的概念。不过，这导致了有一些内容非常的模糊，容易引起疑惑。比如，是所有被创建的对象都需要回收吗？为什么在垃圾回收课题中会经常出现“堆区”的概念？对象在程序运行时到底是如何分配管理的？</p>
+<p>对此，我又向前查找，阅读了《编译原理》第七章的1～4节，在这里再做一下简要总结，同时解答上面的几个疑惑。</p>
+<h2 id="运行时刻环境"><a href="#运行时刻环境" class="headerlink" title="运行时刻环境"></a>运行时刻环境</h2><p>程序语言中包含很多抽象概念，比如：名字(names)、作用域(scopes)、绑定(bindings)、数据类型(data types)、操作符(operators)、过程(procedures)、参数(parameters)和控制流构造(flow-of-control constructs)。编译器为了实现在计算机上支持这些概念，使得程序可以成功运行，需要创建并管理一个<strong>运行时刻环境</strong>(run-time environment)。</p>
+<p>这个环境需要处理的事务如下：</p>
+<ul>
+<li>为源程序中命名的对象分配空间、安排存储位置(the layout and allocation of storage locations for the objects named in the source program)</li>
+<li>确定程序访问变量的机制(the mechanisms used by the target program to access variables)</li>
+<li>过程间的连接(the linkages between procedures)</li>
+<li>确定参数传递机制(the mechanisms for passing parameters)</li>
+<li>实现对操作系统、输入/输出设备及其他程序的接口(the interfaces to the operating system, input/output devices, and other programs)</li>
+</ul>
+<p>这里只关注第一个问题：<strong>为对象分配空间、安排存储位置</strong></p>
+<h2 id="存储组织-Storage-Organization"><a href="#存储组织-Storage-Organization" class="headerlink" title="存储组织(Storage Organization)"></a>存储组织(Storage Organization)</h2><p>程序在它的逻辑地址空间中运行，这个逻辑地址空间是由编译器、操作系统和计算机共同管理和组织的。</p>
+<p>逻辑地址空间中的程序，在运行时刻的映像包含两部分：数据区(data areas)和代码区(program areas)。</p>
+<p>某个语言在某个操作系统上，可能按照如下方式划分内存空间：</p>
+<p> <img src="storage-organization.png" alt="内存空间划分"></p>
+<p><em>为了使运行时刻的空间利用率最大化，设计令堆区和栈区的空间对向增长</em></p>
+<p>具体的空间使用如下表格：</p>
+<table>
+<thead>
+<tr>
+<th>区域</th>
+<th>空间</th>
+<th>存储内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>代码区</td>
+<td>静态</td>
+<td>生成的目标代码</td>
+</tr>
+<tr>
+<td>静态区</td>
+<td>静态</td>
+<td>全局常量、一些编译器产生的数据</td>
+</tr>
+<tr>
+<td>堆区</td>
+<td>动态</td>
+<td>具有长生命周期的数据、编译时不能确定大小的数据</td>
+</tr>
+<tr>
+<td>栈区</td>
+<td>动态</td>
+<td>函数调用过程中产生的活动记录(activation records)</td>
+</tr>
+</tbody></table>
+<p>这里就可以看到，需要考虑动态回收空间的只有数据会动态变化的堆区和栈区，那么为什么垃圾回收只面向堆区呢？这就要详细了解一下栈区的特点了。</p>
+<h2 id="空间的栈式分配"><a href="#空间的栈式分配" class="headerlink" title="空间的栈式分配"></a>空间的栈式分配</h2><p>看到“栈”，就很容易联想到数据结构中的“栈”。总之，它们都是一种适用先入后出(First In, Last Out)场景的结构。</p>
+<p>为了理解程序对空间的栈式分配，这里需要以函数的嵌套调用为例，同时引入一个概念：活动记录(activation records)。</p>
+<p>首先，看这段使用递归的方式实现的快速排序算法。</p>
+<p> <img src="quicksort.png" alt="quickSort"></p>
+<p>我们可以使用简单的函数调用活动序列来描述它：</p>
+<p> <img src="possible-activations.png" alt="possible activations"></p>
+<p>接下来，把它完整递归过程抽象成一个树形结构，这个结构被称为<strong>活动树</strong>(Activation Tree)</p>
+<p> <img src="activation-tree.png" alt="activation tree"></p>
+<p>那么：</p>
+<ul>
+<li>函数的完整调用过程，和活动树的前序遍历对应</li>
+<li>函数的完整返回过程，和活动树的后序遍历对应</li>
+<li>某一次正在进行的函数调用，就对应活动树上的某一个结点。当前全部未结束（活跃的）的调用，就对应当前结点及其祖先节点；调用的顺序，就是从根结点到当前结点的路径；返回的路径，就是调用路径的反向。</li>
+</ul>
+<p>活动树中的每一个节点，都对应着一次函数调用的活动记录，它可能包含的数据如下图所示：</p>
+<p> <img src="activation-record.png" alt="activation record"></p>
+<p><em>图中最下方的位置是接近栈顶的位置，上方接近栈底</em></p>
+<p>到这里，就可以看到，活动记录中，有一部分空间是分配给这一次函数调用的局部数据的。</p>
+<p>整个嵌套调用流程的全部活动记录，是由一个称为<strong>控制栈</strong>(control stack)的运行时刻栈管理的。每一次函数调用的活动记录(activation record)，也可以被称为<strong>帧</strong>(frame)。</p>
+<p>在进入某个函数时，其活动记录被压入栈顶；退出时，则相应的将其活动记录弹出栈顶，复用空间。在这个过程中，活动记录里的局部数据也随之消亡。</p>
+<p> <img src="growing-stack.png" alt="growing stack"></p>
+<p>因此，虽然很多时候，现代程序设计语言中，将无法在编译时刻确定大小的数据放在堆区。但是，当一个对象完整的生命周期都在这个过程(procedure)的局部空间中完成，在局部中创建，在过程(procedure)退出后不需要再进行访问，那么就可以为这个对象在栈区分配空间，同时也不必再考虑其失效后单独回收空间的问题。</p>
+<p>这也就是垃圾回收只需要面向堆区的原因。</p>
+<p>以上。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>编译原理（第二版）[7.1～7.2]</p>
+
+                    
+                    <!-- Tags Bottom -->
+                    
+                        <div class="tags-container-bottom">
+                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Compilers/">#Compilers</a>
+                        </div>
+                    
+
+                    <!-- Comments -->
+                    
+
+
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
+    
+        <p>
+            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
+        </p>
+    
+        <p>
+            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
+        </p>
+    
+        <p>
+            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
+        </p>
+    
+        <p>
+            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
+        </p>
+    
+        <p>
+            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                @All right reserved | Design & Hexo <a class="link dim white" target="_blank" rel="noopener" href="http://www.codeblocq.com/">Jonathan Klughertz</a>
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>

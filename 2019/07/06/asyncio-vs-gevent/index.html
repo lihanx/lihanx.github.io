@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="前言本文列举了一些简单场景下的协程应用，主要目的是通过对比asyncio和gevent的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。
+环境及版本
+Python 3.7
+
+一、创建简单协程并发任务123456789101112131415161718#  使用asynci">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Li Hanxuan">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="asyncio vs gevent"/>
+    
+
+    <!--Open Graph Description-->
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>asyncio vs gevent - Li Hanxuan&#39;s Blog</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Google Analytics -->
+    
+
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
+    
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="首页">
+                    首页
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="时间轴">
+                    时间轴
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/tags" 
+                    title="标签">
+                    标签
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/categories" 
+                    title="分类">
+                    分类
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/about.html" 
+                    title="关于">
+                    关于
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/contact.html" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">asyncio vs gevent</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2019-07-06</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa "></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+                        <div class="tags-container-vertical">
+                            <div class="tags-sub-container">
+                                <a class="fw3 ph1 dib" href="/tags/Asyncio/">#Asyncio</a> <a class="fw3 ph1 dib" href="/tags/Python/">#Python</a> <a class="fw3 ph1 dib" href="/tags/Gevent/">#Gevent</a>
+                            </div>
+                        </div>
+                    
+
+                    <!-- Main Post Content -->
+                    <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文列举了一些简单场景下的协程应用，主要目的是通过对比<code>asyncio</code>和<code>gevent</code>的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。</p>
+<h2 id="环境及版本"><a href="#环境及版本" class="headerlink" title="环境及版本"></a>环境及版本</h2><ul>
+<li>Python 3.7</li>
+</ul>
+<h2 id="一、创建简单协程并发任务"><a href="#一、创建简单协程并发任务" class="headerlink" title="一、创建简单协程并发任务"></a>一、创建简单协程并发任务</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  使用asyncio完成简单协程并发任务</span></span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">import</span> aiohttp</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">download</span>(<span class="params">url</span>):</span></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">with</span> session.get(url) <span class="keyword">as</span> response:</span><br><span class="line">            content = <span class="keyword">await</span> response.read()</span><br><span class="line">            <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line">tasks = <span class="built_in">list</span>()</span><br><span class="line">url_list = [<span class="string">&quot;http://www.xxx.com&quot;</span>]*<span class="number">10</span></span><br><span class="line">loop = asyncio.get_event_loop()</span><br><span class="line"><span class="keyword">for</span> url <span class="keyword">in</span> url_list:</span><br><span class="line">    task = loop.create_task(download(url))</span><br><span class="line">    tasks.append(task)</span><br><span class="line">result = loop.run_until_complete(asyncio.gather(*tasks))</span><br><span class="line">loop.close()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用gevent完成简单协程并发任务</span></span><br><span class="line"><span class="keyword">import</span> gevent</span><br><span class="line"><span class="keyword">from</span> gevent <span class="keyword">import</span> monkey</span><br><span class="line">monkey.patch_all()</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">download</span>(<span class="params">url</span>):</span></span><br><span class="line">    <span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">        response = session.get(url)</span><br><span class="line">        <span class="keyword">return</span> response.content</span><br><span class="line"></span><br><span class="line">tasks = <span class="built_in">list</span>()</span><br><span class="line">url_list = <span class="built_in">list</span>()</span><br><span class="line"><span class="keyword">for</span> url <span class="keyword">in</span> url_list:</span><br><span class="line">    <span class="comment"># 创建greenlet</span></span><br><span class="line">    greenlet_coro = gevent.spawn(download, url)</span><br><span class="line">    tasks.append(greenlet_coro)</span><br><span class="line"><span class="comment"># 阻塞等待全部任务完成</span></span><br><span class="line">gevent.joinall(tasks)</span><br></pre></td></tr></table></figure>
+<p>对比来看，在原生协程中，<code>await</code>语句声明了一个可以挂起当前协程的断点，异步等待一个<code>awaitable</code>对象，同时切换到其他可执行的协程，配合I/O多路复用实现了单线程的并发效果；而Gevent则是通过Monkey Patch，修改了<code>socket</code>的行为，将其转变为非阻塞模式，当然同样是以I/O多路复用为基础。对比来看，这两段简单代码的逻辑也是非常相似，只不过asyncio需要显式声明事件循环，而Gevent并不需要。<br>当然还有一点需要注意的是，<code>monkey.patch_all()</code>打上猴子补丁的位置是有讲究的，官方文档明确提到的，打补丁要在尽量靠前的位置，同时也要考虑并发编程时在什么位置更合适，不过实际的gevent实现的协程，代码的执行逻辑并不直观，还需要进行实际的测试才能更好的理解。</p>
+<h2 id="二、Greenlet和Task方法对比"><a href="#二、Greenlet和Task方法对比" class="headerlink" title="二、Greenlet和Task方法对比"></a>二、<code>Greenlet</code>和<code>Task</code>方法对比</h2><h3 id="class-39-Task-39"><a href="#class-39-Task-39" class="headerlink" title="class &#39;Task&#39;"></a><code>class &#39;Task&#39;</code></h3><table>
+<thead>
+<tr>
+<th>method</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cancel()</code></td>
+<td>取消协程,抛出<code>CancelledError</code>异常</td>
+</tr>
+<tr>
+<td><code>cancelled()</code></td>
+<td>task是否被取消</td>
+</tr>
+<tr>
+<td><code>done()</code></td>
+<td>task是否已完成</td>
+</tr>
+<tr>
+<td><code>result()</code></td>
+<td>返回协程中return的对象</td>
+</tr>
+<tr>
+<td><code>exception()</code></td>
+<td>返回task抛出的异常</td>
+</tr>
+<tr>
+<td><code>add_done_callback(callback, *, context=None)</code></td>
+<td>为task添加回调函数</td>
+</tr>
+<tr>
+<td><code>remove_done_callback(callback)</code></td>
+<td>移除task的回调函数</td>
+</tr>
+</tbody></table>
+<p>这里推荐使用Python 3.7版本的asyncio并且阅读对应的官方标准库文档，3.7的文档重新整理了接口分类，指明了哪些是high level api，哪些是low level API，为使用提供了一些实际的指导。同时也修复了一些在3.6版本中显而易见的bug。</p>
+<h3 id="class-39-Greenlet-39"><a href="#class-39-Greenlet-39" class="headerlink" title="class &#39;Greenlet&#39;"></a><code>class &#39;Greenlet&#39;</code></h3><table>
+<thead>
+<tr>
+<th>method</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ready()</code></td>
+<td>greenlet是否执行完成</td>
+</tr>
+<tr>
+<td><code>successful()</code></td>
+<td>greenlet是否执行完成且没有抛出异常</td>
+</tr>
+<tr>
+<td><code>start()</code></td>
+<td>立即调度greenlet</td>
+</tr>
+<tr>
+<td><code>start_later(seconds)</code></td>
+<td>延时调度greenlet</td>
+</tr>
+<tr>
+<td><code>join(timeout=None)</code></td>
+<td>等待greenlet结束或超时</td>
+</tr>
+<tr>
+<td><code>kill(exception=GreenletExit, block=True, timeout=None)</code></td>
+<td>在greenlet中抛出异常</td>
+</tr>
+<tr>
+<td><code>link(callback)</code></td>
+<td>添加一个greenlet生命周期结束时的回调函数</td>
+</tr>
+<tr>
+<td><code>link_value(callback)</code></td>
+<td>添加一个greenlet完成，并正常返回时回调函数</td>
+</tr>
+<tr>
+<td><code>link_exception(callback)</code></td>
+<td>添加一个greenlet完成，并抛出异常的回调函数</td>
+</tr>
+<tr>
+<td><code>rawlink(callback)</code></td>
+<td>添加一个greenlet执行完成时的回调函数</td>
+</tr>
+<tr>
+<td><code>unlink(callback)</code></td>
+<td>移除<code>link()</code>或<code>rawlink()</code>添加的回调函数</td>
+</tr>
+</tbody></table>
+<h2 id="二、gevent和asyncio协程调度函数对比"><a href="#二、gevent和asyncio协程调度函数对比" class="headerlink" title="二、gevent和asyncio协程调度函数对比"></a>二、<code>gevent</code>和<code>asyncio</code>协程调度函数对比</h2><h3 id="asyncio"><a href="#asyncio" class="headerlink" title="asyncio"></a><code>asyncio</code></h3><table>
+<thead>
+<tr>
+<th>function</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>run(coro, *, debug=False)</code></td>
+<td>直接运行一个协程</td>
+</tr>
+<tr>
+<td><code>create_task(coro)</code></td>
+<td>创建一个Task实例，用于调度协程函数</td>
+</tr>
+<tr>
+<td><code>sleep(delay, result=None, *, loop=None)</code></td>
+<td>sleep</td>
+</tr>
+<tr>
+<td><code>gather(*aws, loop=None, return_exceptions=False)</code></td>
+<td>按照顺序并发调度多个awaitable对象，返回一个awaitable object</td>
+</tr>
+<tr>
+<td><code>wait(aws, *, loop=None, timeout=None, return_when=ALL_COMPLETED)</code></td>
+<td>并发调度awaitables,阻塞至满足return_when的条件，返回一个coroutine</td>
+</tr>
+<tr>
+<td><code>wait_for(aw, timeout, *, loop=None)</code></td>
+<td>等待一个awaitable完成或超时</td>
+</tr>
+<tr>
+<td><code>as_completed(aws, *, loop=None, timeout=None)</code></td>
+<td>并发执行awaitable objects，返回包含Future的迭代器</td>
+</tr>
+<tr>
+<td><code>run_coroutine_threadsafe(coro, loop)</code></td>
+<td>保证线程安全地执行一个协程</td>
+</tr>
+<tr>
+<td><code>current_task(loop=None)</code></td>
+<td>获得当前正在运行的task</td>
+</tr>
+<tr>
+<td><code>all_tasks(loop=None)</code></td>
+<td>获得事件循环中所有未完成的task</td>
+</tr>
+</tbody></table>
+<p>由于<code>asyncio</code>需要显式声明事件循环，并把一部分功能交给了事件循环来做，所以这里把<code>loop</code>的一些涉及到协程调度的方法也列出来：</p>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>run_until_complete(future)</code></td>
+<td>调度执行futurn，阻塞等待至其运行完成</td>
+</tr>
+<tr>
+<td><code>call_soon(callback, *args, context=None)</code></td>
+<td>在事件循环的下一轮中调度callback</td>
+</tr>
+<tr>
+<td><code>call_later(delay, callback, *args, context=None)</code></td>
+<td>延迟调度callback</td>
+</tr>
+<tr>
+<td><code>create_task(coro)</code></td>
+<td>创建一个Task实例，用于调度协程函数</td>
+</tr>
+</tbody></table>
+<h3 id="gevent"><a href="#gevent" class="headerlink" title="gevent"></a><code>gevent</code></h3><table>
+<thead>
+<tr>
+<th>funtion</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>spawn(function, *args, **kwargs)</code></td>
+<td>创建一个greenlet对象，并调度它执行function</td>
+</tr>
+<tr>
+<td><code>spawn_later(seconds, function, *args, **kwargs)</code></td>
+<td>创建一个greenlet对象并延迟调度</td>
+</tr>
+<tr>
+<td><code>spawn_raw(function, *args, **kwargs)</code></td>
+<td>和<code>spawn</code>相似，详见文档描述</td>
+</tr>
+<tr>
+<td><code>getcurrent()</code></td>
+<td>获取当前正在执行的greenlet</td>
+</tr>
+<tr>
+<td><code>kill(greenlet, exception=GreenletExit)</code></td>
+<td>异步终止greenlet</td>
+</tr>
+<tr>
+<td><code>killall(greenlets, exception=GreenletExit, block=True, timeout=None)</code></td>
+<td>通过使greenlet抛出异常来强制终止所有greenlet</td>
+</tr>
+<tr>
+<td><code>sleep(seconds=0, ref=True)</code></td>
+<td>sleep</td>
+</tr>
+<tr>
+<td><code>wait(objects=None, timeout=None, count=None)</code></td>
+<td>等待一个object处于ready状态或事件循环结束</td>
+</tr>
+<tr>
+<td><code>iwait(objects, timeout=None, count=None)</code></td>
+<td>等待所有object就绪或到达超时事件，返回一个迭代器</td>
+</tr>
+<tr>
+<td><code>joinall(greenlets, timeout=None, raise_error=False, count=None)</code></td>
+<td>等待所有greenlet完成</td>
+</tr>
+</tbody></table>
+<p>可以看到，整体来说，gevent和asyncio的api设计非常相似，同样的功能用它们两个都可以实现，只不过是代码风格上会有些差异。</p>
+
+                    
+                    <!-- Tags Bottom -->
+                    
+                        <div class="tags-container-bottom">
+                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Asyncio/">#Asyncio</a> <a class="fw3 ph1 dib" href="/tags/Python/">#Python</a> <a class="fw3 ph1 dib" href="/tags/Gevent/">#Gevent</a>
+                        </div>
+                    
+
+                    <!-- Comments -->
+                    
+
+
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
+    
+        <p>
+            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
+        </p>
+    
+        <p>
+            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
+        </p>
+    
+        <p>
+            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
+        </p>
+    
+        <p>
+            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
+        </p>
+    
+        <p>
+            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                @All right reserved | Design & Hexo <a class="link dim white" target="_blank" rel="noopener" href="http://www.codeblocq.com/">Jonathan Klughertz</a>
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Description-->
+    
+        <meta name="description" content="前言在之前，我总结了一篇用户级线程 与 内核级线程的问答，描述了用户级线程和内核级线程各自的特性。这也使我一度认为，Python中常常被人诟病的多线程无法同时被多核分配的原因，是因为它使用了用户级线程。然而最近，在我重新审视一些多线程的问题时，我突然发现，我的理解存在很大偏差。于是我重新查阅了一些资">
+    
+
+    <!--Author-->
+    
+        <meta name="author" content="Li Hanxuan">
+    
+
+    <!--Open Graph Title-->
+    
+        <meta property="og:title" content="线程实现模型(Thread Implementation models)"/>
+    
+
+    <!--Open Graph Description-->
+    
+
+    <!--Open Graph Site Name-->
+    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
+
+    <!--Type page-->
+    
+        <meta property="og:type" content="article" />
+    
+
+    <!--Page Cover-->
+    
+
+    <meta name="twitter:card" content="summary" />
+    
+
+    <!-- Title -->
+    
+    <title>线程实现模型(Thread Implementation models) - Li Hanxuan&#39;s Blog</title>
+
+    <!-- Tachyons Core CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Google Analytics -->
+    
+
+
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+
+<body>
+
+<!-- Main Content -->
+<!-- Banner -->
+<!-- Banner -->
+<div class="w-100 bg-1 ph5-ns ph3 text-light">
+    
+    <nav class="db dt-l w-100 mw8 center border-box pv3">
+        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
+            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+        </a>
+        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/" 
+                    title="首页">
+                    首页
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/archives" 
+                    title="时间轴">
+                    时间轴
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/tags" 
+                    title="标签">
+                    标签
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/categories" 
+                    title="分类">
+                    分类
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/about.html" 
+                    title="关于">
+                    关于
+                </a>
+            
+                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
+                    href="/contact.html" 
+                    title="Contact">
+                    Contact
+                </a>
+            
+        </div>
+    </nav>
+
+    <!-- Title -->
+    <div class="w-100 mw8 center vh-40 dt">
+        <div class="dtc v-mid white">
+            <h1 class="f1-l f2-m tc tc-m tl-ns">线程实现模型(Thread Implementation models)</h1>
+            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2020-03-21</p>
+        </div>
+    </div>
+
+    <!-- Icon -->
+    <div class="relative w-100 mw8 center white dn dn-m db-ns">
+        <i class="header-icon fa "></i>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
+    <div class="content">
+        <div class="mw8 center">
+            <div class="cf">
+                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
+                    <!-- Tags Vertical -->
+                    
+                        <div class="tags-container-vertical">
+                            <div class="tags-sub-container">
+                                <a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a>
+                            </div>
+                        </div>
+                    
+
+                    <!-- Main Post Content -->
+                    <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在之前，我总结了一篇<a href="/2019/02/13/user-level-threads-and-kernel-level-threads/">用户级线程 与 内核级线程</a>的问答，描述了<strong>用户级线程</strong>和<strong>内核级线程</strong>各自的特性。这也使我一度认为，Python中常常被人诟病的多线程无法同时被多核分配的原因，是因为它使用了用户级线程。然而最近，在我重新审视一些多线程的问题时，我突然发现，我的理解存在很大偏差。于是我重新查阅了一些资料，在这里重新进行梳理。</p>
+<h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><h3 id="POSIX-Threads"><a href="#POSIX-Threads" class="headerlink" title="POSIX Threads"></a>POSIX Threads</h3><p>为了保证多线程编程的可移植性，IEEE定义了一套标准的线程接口规范，这就是POSIX线程规范。跟据这个规范实现的线程库，通常被称作Pthread。POSIX Threads只是接口规范的定义，具体的实现取决于不同的操作系统。</p>
+<h3 id="KSE-Kernel-Scheduling-Entity"><a href="#KSE-Kernel-Scheduling-Entity" class="headerlink" title="KSE(Kernel Scheduling Entity)"></a>KSE(Kernel Scheduling Entity)</h3><p>内核调度实体是最终内核进行调度的对象，可以将线程或者进程看作是基于KSE构建的抽象调度单元，仅仅是在共享的一些属性上有些或多或少的差异(虚拟内存、文件描述符、PID等等)。Posix Threads对线程间属性共享的要求，只是众多可能性中的一种。</p>
+<h2 id="线程实现模型（Thread-Implementation-models）"><a href="#线程实现模型（Thread-Implementation-models）" class="headerlink" title="线程实现模型（Thread Implementation models）"></a>线程实现模型（Thread Implementation models）</h2><p>不同线程实现模型间的主要区别在于线程与KSEs的映射关系。</p>
+<h3 id="多对一实现-Many-to-one-M-1-Implementations"><a href="#多对一实现-Many-to-one-M-1-Implementations" class="headerlink" title="多对一实现(Many-to-one M:1 Implementations)"></a>多对一实现(Many-to-one M:1 Implementations)</h3><p>多对一实现，又被称作<strong>用户级线程</strong>(user-level threads)。<br>在多对一实现中，线程的创建、调度和同步完全由用户空间的线程库来处理，内核对多个线程的存在并无感知。那么，这样的实现就存在两个问题：</p>
+<ul>
+<li><p>当一个线程发起系统调用，比如<code>read()</code>，控制权由用户空间的线程库转交到了内核，那么所有线程都将被阻塞</p>
+</li>
+<li><p>由于内核感知不到用户空间多个线程的存在，内核无法参与调度，线程也就无法被多核分配。</p>
+</li>
+</ul>
+<p><em>第二点听起来很像Python多线程的情况，但实际并不是这样，这也是我最开始理解错的地方。线程实现取决于操作系统，Linux中的线程是使用1:1模型实现的，而Python多线程同一时刻只有一个线程运行，是因为Python解释器存在线程安全问题，引入了GIL，从而限制了多个线程的调度运行</em></p>
+<h3 id="一对一实现-One-to-one-1-1-Implementations"><a href="#一对一实现-One-to-one-1-1-Implementations" class="headerlink" title="一对一实现(One-to-one 1:1 Implementations)"></a>一对一实现(One-to-one 1:1 Implementations)</h3><p>一对一实现，又被称作<strong>内核级线程</strong>(kernel-level threads)。<br>在一对一实现中，每个线程对应一个独立的KSE。内核可以独立调度每一个线程，线程间同步是通过系统调用实现的。<br>1:1实现解决了一个M:1中的问题。一个阻塞的系统调用不会导致进程中所有线程都被阻塞。然而，内核需要为每一个线程维护一个KSE，如果开启了大量的线程，会增加内核调度的负荷，影响系统性能。</p>
+<p>尽管存在着一些缺点，但1:1模型仍然是比较好的选择。Linux系统的两种线程实现 —— LinuxThreads 和 NPTL(Native Posix Threads Library) 都是使用的1:1实现模型。</p>
+<h3 id="多对一实现-Many-to-many-M-N-Implementations"><a href="#多对一实现-Many-to-many-M-N-Implementations" class="headerlink" title="多对一实现(Many-to-many M:N Implementations)"></a>多对一实现(Many-to-many M:N Implementations)</h3><p>多对多实现，又被称作<strong>两级线程</strong>(two-level threads)。<br>两级线程实现解决了M:1和1:1实现模型的缺点，然而它也存在一个重要的问题，就是它两级实现过于复杂(complexity)了。<br>起初NPTL考虑过M:N实现，但是由于需要对内核进行修改，而且可能并没有足够的必要性，最终被驳回了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>综上所述，线程实现取决于操作系统，Linux选用的是1:1实现模型，即内核级线程。<br>而Python在Linux平台上同样使用的是Linux pthread，然而由于GIL，导致了线程被限制，无法同时被多核调度。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li>The Linux Programming Interface 28.2.1/33.4</li>
+<li><a target="_blank" rel="noopener" href="http://man7.org/linux/man-pages/man7/pthreads.7.html">Linux Man Pages - pthread</a></li>
+<li>现代操作系统</li>
+</ol>
+
+                    
+                    <!-- Tags Bottom -->
+                    
+                        <div class="tags-container-bottom">
+                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Linux/">#Linux</a>
+                        </div>
+                    
+
+                    <!-- Comments -->
+                    
+
+
+
+                </div>
+                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
+                    
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 1: About -->
+                    <div class="mt5 mt0-l">
+    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
+        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
+            <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
+        </div>
+        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+        </div>
+    </article>
+</div>
+
+                    <hr class="dn-l mw4 black-50 mt5" />
+                    
+                    <!-- Widget 2: Categories -->
+                    
+
+                    <!-- Widget 3: Recent Posts -->
+                    <div class="mt5 tc tl-l">
+    <h3>Recent Posts</h3>
+    
+        <p>
+            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
+        </p>
+    
+        <p>
+            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
+        </p>
+    
+        <p>
+            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
+        </p>
+    
+        <p>
+            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
+        </p>
+    
+        <p>
+            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
+        </p>
+    
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer -->
+<div class="bg-1 ph2 ph5-ns pv5">
+        <div class="mv8">
+            <div class="center tc">
+                
+                    <div class="dib mh3">
+                        <a class="f3 f2-ns white dim" href="https://github.com/klugjo/hexo-theme-anodyne" target="_blank">
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </div>
+                
+            </div>
+            <div class="f6 f5-ns center tc white pt5 fw3">
+                @All right reserved | Design & Hexo <a class="link dim white" target="_blank" rel="noopener" href="http://www.codeblocq.com/">Jonathan Klughertz</a>
+            </div>
+        </div>
+    </div>
+
+<!-- After Footer -->
+<!-- Disqus Comments -->
+
+
+
+</body>
+
+</html>
