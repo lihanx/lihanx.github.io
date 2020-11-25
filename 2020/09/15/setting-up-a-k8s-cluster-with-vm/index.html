@@ -1,147 +1,268 @@
+
 <!DOCTYPE html>
-<html lang="en">
-
-<!-- Head tag -->
+<html lang="zh-cn">
+    
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!--Description-->
+    <meta name="generator" content="李瀚翾&#39;s Blog">
+    <title>使用 Virtualbox 创建 VM k8s 集群 - 李瀚翾&#39;s Blog</title>
+    <meta name="author" content="李瀚翾">
     
-        <meta name="description" content="努力建设中...">
     
-
-    <!--Author-->
     
-        <meta name="author" content="Li Hanxuan">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n\n\n前期准备\nVirtualbox\nCentOS-7-x86_64-Minimal-2003.iso\n\n实验环境\nmacOS Catalina\n\n整体流程\n创建 master 虚拟机\n安装 CentOS 系统\n对系统进行必要的设置\n安装 k8s 工作组件\n克隆虚拟机，创建工作节点\n创建集群\n\n实践(一) 创建 master 虚拟机\n打开 Virtualbox，点击新建\n\n名称 k8s-master\n类型 Linux\n版本 Red Hat(64-bit)\n\n\n使用建议的内存\n创建虚拟硬盘 \n现在创建虚拟硬盘\nVDI(Virtualbox磁盘映像)\n动态分配\n6.00 GB\n\n\n\n按照向导提示，选择上面指定的选项，到这里就完成了虚拟机的创建。\n接下来还有一些必要的设置：\n\n选中虚拟机，点击设置\n系统 - 处理器 - 处理器数量 2\n网络 - 连接方式 - 桥接网卡\n\n这里将处理器数量设置为 2，是因为后面在启动 k8s 相关服务的时候，1核 CPU 是无法正常运行的。当然这个值随时可以更改，也可以遇到问题再修改。\n选择桥接网卡模式，是为了将多个虚拟机组成一个局域网，使每个虚拟机能拥有自己独立的 IP\n这样，master 节点的虚拟机就创建好了。\n(二) 安装 CentOS 7\n在 Virtualbox 主界面，选中创建好的虚拟机，点击**[光驱]没有盘片**，装载系统镜像\n完成上一步操作后，点击启动\n启动界面，选择 Install CentOS 7\n语言和键盘建议选择 English (避免出现无法输入中文或者中文路径导致异常的情况),continue 继续\n到了 Install Summary 的界面，这里要进行的操作比较多\nDATE &amp; TIME 修改为Asia/ShangHai\nINSTALLATION DESTINATION 点进去直接 Done 再回来\nNETWORK &amp; HOST NAME 点进去，右侧的开关切换到 ON 的状态，然后下方 Host name 修改为 master.k8s\n\n\n完成上一步设置后，可以点击 Begin Installation 开始安装\n经过漫长的等待之后，就可以点击 REBOOT 重启了，这样系统就安装完成了\n\n(三) 必要的系统设置安装k8s相关组件的时候，有以下设置必须完成：\n\n关闭 SELinux\n关闭 Firewalld\n关闭 Swap\n开启 net.bridge.bridge-nf-call-iptables 内核选项\n\n1. 关闭 SELinux由于 VM 里面还没有安装 Vim，可以选择先安装，或者直接使用 Vi 进行编辑\n修改 /etc/selinux/config, 将文件中的 SELINUX=enforcing 一行，修改为 SELINUX=permissive\n2. 关闭 Firewalld1$ systemctl disable firewalld &amp;&amp; systemctl stop firewalld\n\n\n\n3. 关闭 Swap1$ swapoff -a &amp;&amp; sed -i &#x27;/ swap / s/^/#/&#x27; /etc/fstab\n\n可以使用 free -w 来查看完整的内存信息，可以看到 swap 的状态\n4. 开启 net.bridge.bridge-nf-call-iptables 内核设置这一步在这里还不能执行，需要等到启动 docker 和 kubelet 服务之后，才能正确执行\n12$ sysctl -w net.bridge.bridge-nf-call-iptables=1$ echo &quot;net.bridge.bridge-nf-call-iptables=1&quot; &gt; /etc/sysctl.d/k8s.conf\n\n\n\n(四) 安装 k8s 工作组件由于无法访问 google 源，并且 k8s 拉取镜像时会默认访问境外的 Docker 镜像仓库，从这里开始会遇到一些坑，需要手动去完成操作。\n1. 添加 kubernetes yum源这里选择阿里云的 yum 源\n12345678910cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo[kubernetes]name=Kubernetesbaseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/enabled=1gpgcheck=1repo_gpgcheck=1gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpgexclude=kube*EOF\n\n\n\n2. 安装必要组件1yum install -y docker kubelet kubeadm kubectl kubernetes-cni --disableexcludes&#x3D;kubernetes\n\n\n\n3. 启动必要服务12$ systemctl enable docker &amp;&amp; systemctl start docker$ systemctl enable kubelet &amp;&amp; systemctl start kubelet\n\n在这里执行 net.bridge.bridge-nf-call-iptables 的相关设置\n(五) 克隆虚拟机，创建工作节点\n首先 shutdown now 关闭当前 master 虚拟机\n在 Virtualbox 主界面选中 master 虚拟机，右键，选择复制\n名称 m8s-node1\nMAC 地址设定 为所有网卡重新生成 MAC 地址\n点击继续， 选择完全复制\n\n\n参照步骤 2，克隆 k8s-node2\n启动所有节点\n使用 hostnamectl --static set-hostname node1.k8s 修改 node1 的名称(node2同理)，重启就可以看到效果了\n使用 ip addr 命令查看每一台虚拟机的 IP 地址，按照如下格式追加到所有节点的 /etc/hosts 文件中\n\n123192.168.0.104 master.k8s192.168.0.105 node1.k8s192.168.0.106 node2.k8s\n\n\n\n(六) 创建集群1. 手动拉取 docker 镜像原本直接使用 kubeadm init 就可以初始化集群的 master 节点，但是由于 k8s 默认拉取镜像的源被墙，直接运行命令完全没办法继续。\n因此，这里我们参考 这篇文章 的方法，使用 shell 脚本的方式手动获取镜像。\n为了稍微少打几行字，我们可以 kubeadm config images list &gt; manualpull.sh 将镜像名称输入到文件。\n然后使用参考文章中给出的脚本手动拉取 docker 镜像。\n脚本内容如下：\n123456789101112131415images=(    kube-apiserver:v1.12.1    kube-controller-manager:v1.12.1    kube-scheduler:v1.12.1    kube-proxy:v1.12.1    pause:3.1    etcd:3.2.24    coredns:1.2.2)for imageName in $&#123;images[@]&#125; ; do    docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName    docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName    docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageNamedone\n\n这里拉取的 docker 镜像每个节点都需要，因此可以选择先拉取镜像，再克隆节点。也可以通过 scp 发送脚本在各节点中单独拉取。\n2. 集群 master 节点初始化执行命令进行初始化\n1kubeadm init &gt; initialization.log\n\n这里把输出写入文件主要是因为 VM 里面不方便复制粘贴和滚屏，写文件比较容易编辑\n3. 设置 kubectl 环境变量1$ export KUBECONFIG=/etc/kubernetes/admin.conf\n将上面这行写入 /etc/profile 文件中，然后执行如下命令使修改生效\n1$ source /etc/profile\n\n\n\n\n4. 将工作节点加入集群执行 tail -n 2 &gt; joinode.sh 将 initialization.log 文件末尾两行的命令写入文件，发送到工作节点中。 格式如下：\n1kubeadm join 192.168.0.104:6443 --token ezalac.umfjciqd2lumq1yl --discovery-token-ca-cert-hash sha256:b104b5832b0ab52871161dec0156c7f2ee3456ed90900a153377a3155a6baed6\n\n在 node1, node2 分别执行 bash joinode.sh\n然后在 master 节点中，使用命令 kubectl get nodes 就可以查看到新加入的两个子节点了。\n不过这个时候状态还是 Not Ready，还需要给 master 节点安装网络插件\n5. 为 master 节点安装网络插件1$ kubectl apply -f &quot;https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d &#x27;\\n&#x27;)\n\n\n\n6. 拷贝配置文件首先将配置文件拷贝到工作节点 node1 和 node2\n1$ scp -P 22 /etc/kubernetes/admin.conf root@192.168.0.104:/etc/kubernetes/admin.conf\n\n然后用和上面同样的方式，设置好环境变量。\n以上设置完成之后，可以在 master 节点使用 kubectl get nodes 命令看到，节点都已经变成了 ready 的状态，这样，一个虚拟机组成的练手集群就搭建完成了。\n参考资料\n《Kubernetes in Action》 - Appendix B\nkubernetes安装（国内环境）- soolaugust[知乎]\n","dateCreated":"2020-09-15T00:00:00+08:00","dateModified":"2020-11-25T21:37:53+08:00","datePublished":"2020-09-15T00:00:00+08:00","description":"","headline":"使用 Virtualbox 创建 VM k8s 集群","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/","keywords":"Kubernetes, K8S, VirtualBox"}</script>
+    <meta property="og:type" content="blog">
+<meta property="og:title" content="使用 Virtualbox 创建 VM k8s 集群">
+<meta property="og:url" content="https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/index.html">
+<meta property="og:site_name" content="李瀚翾&#39;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-11-25T13:37:53.324Z">
+<meta property="article:author" content="李瀚翾">
+<meta property="article:tag" content="Kubernetes">
+<meta property="article:tag" content="K8S">
+<meta property="article:tag" content="VirtualBox">
+<meta name="twitter:card" content="summary">
     
-
-    <!--Open Graph Title-->
     
-        <meta property="og:title" content="使用 Virtualbox 创建 VM k8s 集群"/>
+        
     
-
-    <!--Open Graph Description-->
     
-        <meta property="og:description" content="努力建设中..." />
+        <meta property="og:image" content="https://lihanx.github.io/assets/images/profile.jpg"/>
     
-
-    <!--Open Graph Site Name-->
-    <meta property="og:site_name" content="Li Hanxuan&#39;s Blog"/>
-
-    <!--Type page-->
     
-        <meta property="og:type" content="article" />
     
-
-    <!--Page Cover-->
     
-
-    <meta name="twitter:card" content="summary" />
+    <!--STYLES-->
     
+<link rel="stylesheet" href="/assets/css/style-xauyfozqtqozcpsrphukridnjkr9dhe8pwadzdb0xqjt4tr2luvsk6bxwf84.min.css">
 
-    <!-- Title -->
-    
-    <title>使用 Virtualbox 创建 VM k8s 集群 - Li Hanxuan&#39;s Blog</title>
-
-    <!-- Tachyons Core CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
-
-    <!-- Custom Fonts -->
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <!-- Custom CSS -->
-    
-<link rel="stylesheet" href="/css/style.css">
-
-
-    <!-- Google Analytics -->
+    <!--STYLES END-->
     
 
-
-<meta name="generator" content="Hexo 5.2.0"></head>
-
-
-<body>
-
-<!-- Main Content -->
-<!-- Banner -->
-<!-- Banner -->
-<div class="w-100 bg-1 ph5-ns ph3 text-light">
     
-    <nav class="db dt-l w-100 mw8 center border-box pv3">
-        <a class="db dtc-l v-mid link dim w-100 w-25-l tc tl-l mb2 mb0-l white" href="/" title="Li Hanxuan's Blog">
-            <img src="http://www.codeblocq.com/assets/projects/hexo-theme-anodyne/assets/anodyne.svg" class="dib h3" alt="Li Hanxuan's Blog">
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="4">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            李瀚翾&#39;s Blog
         </a>
-        <div class="db dtc-l v-mid w-100 w-75-l tc tr-l">
-            
-                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
-                    href="/" 
-                    title="首页">
-                    首页
-                </a>
-            
-                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
-                    href="/archives" 
-                    title="归档">
-                    归档
-                </a>
-            
-                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
-                    href="/tags" 
-                    title="标签">
-                    标签
-                </a>
-            
-                <a class="link dim f6 f5-l dib mr3 mr4-l white" 
-                    href="/categories" 
-                    title="分类">
-                    分类
-                </a>
-            
-        </div>
-    </nav>
-
-    <!-- Title -->
-    <div class="w-100 mw8 center vh-40 dt">
-        <div class="dtc v-mid white">
-            <h1 class="f1-l f2-m tc tc-m tl-ns">使用 Virtualbox 创建 VM k8s 集群</h1>
-            <p class="f4 fw3 pab-100px tc tc-m tl-ns">2020-09-15</p>
-        </div>
     </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="打开链接: /#about"
+            >
+        
+        
+            <img class="header-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+        
+        </a>
+    
+</header>
 
-    <!-- Icon -->
-    <div class="relative w-100 mw8 center white dn dn-m db-ns">
-        <i class="header-icon fa "></i>
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="4">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a
+                    href="/#about"
+                    aria-label="阅读有关作者的更多信息"
+                >
+                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+                </a>
+                <h4 class="sidebar-profile-name">李瀚翾</h4>
+                
+                    <h5 class="sidebar-profile-bio"></h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="首页"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">首页</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="分类"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">分类</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="标签"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">标签</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="归档"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">归档</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="关于"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">关于</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/lihanx"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:lihanx9@163.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="邮箱"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">邮箱</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
     </div>
+</nav>
+
+            
+            <div id="main" data-behavior="4"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            使用 Virtualbox 创建 VM k8s 集群
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2020-09-15T00:00:00+08:00">
+	
+		    2020年 9月 15日
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/Kubernetes/">Kubernetes</a>
+
+
+    
 </div>
 
-<!-- Content -->
-<div class="w-100 ph2 ph4-m ph5-l mv5 mv6-l">
-    <div class="content">
-        <div class="mw8 center">
-            <div class="cf">
-                <div class="fl w-100 w-70-l mw7 left fw3 lh-copy pr4-ns pr0-m post-content">
-                    <!-- Tags Vertical -->
-                    
-                        <div class="tags-container-vertical">
-                            <div class="tags-sub-container">
-                                <a class="fw3 ph1 dib" href="/tags/Kubernetes/">#Kubernetes</a> <a class="fw3 ph1 dib" href="/tags/K8S/">#K8S</a> <a class="fw3 ph1 dib" href="/tags/VirtualBox/">#VirtualBox</a>
-                            </div>
-                        </div>
-                    
+    
+</div>
 
-                    <!-- Main Post Content -->
-                    <h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <!-- excerpt -->
+
+
+<h2 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/help/virtualbox/">Virtualbox</a></li>
 <li><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/centos/7.8.2003/isos/x86_64/">CentOS-7-x86_64-Minimal-2003.iso</a></li>
 </ul>
@@ -286,109 +407,323 @@
 <li>《Kubernetes in Action》 - Appendix B</li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/46341911">kubernetes安装（国内环境）- soolaugust[知乎]</a></li>
 </ol>
+            
 
-                    
-                    <!-- Tags Bottom -->
-                    
-                        <div class="tags-container-bottom">
-                            <i class="fa fa-tag pr3 text-main-color"></i><a class="fw3 ph1 dib" href="/tags/Kubernetes/">#Kubernetes</a> <a class="fw3 ph1 dib" href="/tags/K8S/">#K8S</a> <a class="fw3 ph1 dib" href="/tags/VirtualBox/">#VirtualBox</a>
-                        </div>
-                    
 
-                    <!-- Comments -->
-                    
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/K8S/" rel="tag">K8S</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Kubernetes/" rel="tag">Kubernetes</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/VirtualBox/" rel="tag">VirtualBox</a>
 
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/07/06/asyncio-source-code-analysis/"
+                    data-tooltip="asyncio源码浅析（一）- 事件循环(EventLoop)"
+                    aria-label="下一篇: asyncio源码浅析（一）- 事件循环(EventLoop)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2020 李瀚翾. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="4">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2020/07/06/asyncio-source-code-analysis/"
+                    data-tooltip="asyncio源码浅析（一）- 事件循环(EventLoop)"
+                    aria-label="下一篇: asyncio源码浅析（一）- 事件循环(EventLoop)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Diesen Beitrag teilen"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Nach oben">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
 
 
                 </div>
-                <div class="fl w-100 w-30-l center fw3 lh-copy pl4-ns tl black-50">
-                    
-                    <hr class="dn-l mw4 black-50 mt5" />
-                    
-                    <!-- Widget 1: About -->
-                    <div class="mt5 mt0-l">
-    <article class="dt db-l mw8 mw8-m mw5-ns center ml0-l bg-white mv3">
-        <div class="dn dtc-m db-l v-mid tc pr4 pr0-l" style="min-width: 6rem;">
-            <img src="/images/profile.png" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="Li Hanxuan">
-        </div>
-        <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="4">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                        aria-label="分享到 Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                        aria-label="分享到 Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://lihanx.github.io/2020/09/15/setting-up-a-k8s-cluster-with-vm/"
+                        aria-label="分享到 Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
             
         </div>
-    </article>
-</div>
-
-                    <hr class="dn-l mw4 black-50 mt5" />
-                    
-                    <!-- Widget 2: Categories -->
-                    
-                        <div class="mt5 tc tl-l">
-    <h3>文章分类</h3>
-    
-        <p>
-            <a href="/categories/Kubernetes/">Kubernetes</a>
-        </p>
-    
-</div>
+        
 
 
-                        <hr class="dn-l mw4 black-50 mt5" />
-                    
+    
+        
+    
 
-                    <!-- Widget 3: Recent Posts -->
-                    <div class="mt5 tc tl-l">
-    <h3>近期更新</h3>
-    
-        <p>
-            <a href="/2020/09/15/setting-up-a-k8s-cluster-with-vm/">使用 Virtualbox 创建 VM k8s 集群</a>
-        </p>
-    
-        <p>
-            <a href="/2020/07/06/asyncio-source-code-analysis/">asyncio源码浅析</a>
-        </p>
-    
-        <p>
-            <a href="/2020/03/21/thread-implementation-models/">线程实现模型(Thread Implementation models)</a>
-        </p>
-    
-        <p>
-            <a href="/2019/12/05/system-calls/">Linux系统调用(System Calls)流程</a>
-        </p>
-    
-        <p>
-            <a href="/2019/09/24/the-run-time-storage-organization/">运行时的内存管理</a>
-        </p>
-    
-</div>
-                </div>
-            </div>
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
         </div>
+        
+            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+        
+            <h4 id="about-card-name">李瀚翾</h4>
+        
+            <div id="about-card-bio"></div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Python 开发工程师</p>
+
+            </div>
+        
+        
     </div>
 </div>
 
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover-v1.2.0.jpg');"></div>
+        <!--SCRIPTS-->
 
-<!-- Footer -->
-<div class="bg-1 ph2 ph5-ns pv5">
-        <div class="mv8">
-            <div class="center tc">
-                
-                    <div class="dib mh3">
-                        <a class="f3 f2-ns white dim" href="https://github.com/lihanx" target="_blank">
-                            <i class="fa fa-github"></i>
-                        </a>
-                    </div>
-                
-            </div>
-            <div class="f6 f5-ns center tc white pt5 fw3">
-                @All right reserved
-            </div>
-        </div>
-    </div>
+<script src="/assets/js/script-pwcx44shgfco2srkcnhh8knfc88726ymos4auiuwmqt6fcetpnkbnhqtt4ce.min.js"></script>
 
-<!-- After Footer -->
-<!-- Disqus Comments -->
+<!--SCRIPTS END-->
+
+
+    
 
 
 
-</body>
 
+    </body>
 </html>
