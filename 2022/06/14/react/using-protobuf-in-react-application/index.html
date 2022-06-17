@@ -1,0 +1,717 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="技术与生活">
+    <title>在 React 项目中使用 Protobuf 协议 - 技术与生活</title>
+    <meta name="author" content="lihanxuan">
+    
+    
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n前言本文总结了在 React App 中处理 ProtoBuf 协议的一种方式, 同时包含 React 自定义 Hook, axios interceptors 等内容, 共同组成了前后端交互的相关功能.\n跟随本文的步骤, 可以完整的创建一个独立的示例 App.\n本文主要按照以下几个步骤进行:\n\n创建 React App\n安装依赖\n创建自定义 Hook\n创建并配置 axios 实例\n编写 Proto 定义\n创建一个组件\n为 axios 实例添加 interceptors 函数\n将组件添加到 App\n修改 index.js\n启动项目\n\n本文假设你已经有了可以正常运行的 Node.js 环境. 如果还没有, 你可以从 官网 进行下载安装.\n\n创建 React App使用 npm 创建一个名为 proto-test 的项目:\n1$ npx create-react-app proto-test\n按照文档的推荐, 无需预先安装 create-react-app 工具, 并且建议先卸载全局安装的 create-react-app\n创建项目并安装依赖的过程可能会持续几分钟, 请耐心等待\n\n安装依赖首先进入 proto-test 目录\n1$ cd proto-test\n由于 React 18 版本相关依赖存在一些原因未知的问题, 这里使用 React 17 版本.通过修改 package.json 文件指定依赖版本, 将 package.json 文件中的 dependencies 值改为如下内容:\n12345678&quot;dependencies&quot;: &#123;  &quot;protobufjs&quot;: &quot;^6.11.3&quot;,  &quot;axios&quot;: &quot;^0.25.0&quot;,  &quot;react&quot;: &quot;^17.0.2&quot;,  &quot;react-dom&quot;: &quot;^17.0.2&quot;,  &quot;react-scripts&quot;: &quot;5.0.0&quot;,  &quot;web-vitals&quot;: &quot;^2.1.4&quot;&#125;\n保存 package.json 文件后, 使用如下命令安装全部依赖\n1$ npm i\n注意: Protobufjs 文档中给出的相关示例, 并不完全适用于 react app, 原文档仅供参考.\nAxios 文档Protobufjs 文档  \n\n创建自定义 Hook首先, 我们在项目的 src 目录下创建一个名为 hooks 子目录, 并在其中创建一个名为 useAxios.js 的文件.\n123$ cd src$ mkdir hooks$ touch hooks/useAxios.js\n使用文本编辑器打开 useAxios.js 文件, 向其中粘贴如下代码:\n12345678910111213141516171819202122232425262728293031323334353637383940414243import &#123; useState, useEffect &#125; from &#x27;react&#x27;;const useAxios = (configObj) =&gt; &#123;    const &#123;        axiosInstance,        method,        url,        requestConfig = &#123;&#125;,    &#125; = configObj;    const [response, setResponse] = useState([]);    const [error, setError] = useState(&#x27;&#x27;);    const [loading, setLoading] = useState(true);    useEffect(() =&gt; &#123;        const controller = new AbortController();        const fetchData = async () =&gt; &#123;            try &#123;                const res = await axiosInstance[method.toLowerCase()](url, &#123;                    ...requestConfig,                    signal: controller.signal                &#125;);                setResponse(res.data);            &#125; catch(err) &#123;                console.log(err.message);                setError(err.message);            &#125; finally &#123;                setLoading(false);            &#125;        &#125;;        fetchData();        return () =&gt; controller.abort();    &#125;, []);    return [response, error, loading];&#125;;export default useAxios;\n这段代码主要实现的功能如下:\n\n使用箭头函数语法声明一个函数, 并赋值给 useAxios 变量;\n对参数 configObj 进行解构赋值(Destructuring Assignment), 获得 axiosInstance, method, url, requestConfig 四个变量, 并为 requestConfig 设置默认值.\n分别使用 useState Hook 设置了三个局部状态变量 response, error, loading.\n在 useEffect Hook 中使用 axios 执行请求, 并更新局部状态变量. 返回一个使用 controller 清除状态的函数.\n返回 response, error, loading 三个变量.\n使用 export default 对外暴露刚刚声明的 useAxios 变量.\n\n\n创建并配置 axios 实例在 src 目录下创建一个名为 apis 的子目录, 并在其中创建一个名为 base.js 的文件\n12$ mkdir apis$ touch apis/base.js\n向 base.js 中粘贴如下代码:\n1234567891011121314import axios from &#x27;axios&#x27;;import protobuf from &#x27;protobufjs&#x27;;const BASE_URL = &#x27;http://192.168.0.106:8080/api/v1/&#x27;;const instance = axios.create(&#123;    baseURL: BASE_URL,    headers: &#123;        &#x27;Accept&#x27;: &#x27;application/x-protobuf&#x27;,    &#125;,    responseType: &#x27;arraybuffer&#x27;,&#125;);export default instance;\n在这段代码中, 实现的功能如下:\n\n设置了全局常量 BASE_URL, 这是你将要请求的接口 url 的通用前缀.\n创建了一个 axios 实例并赋值给 instance 变量, 并在传入的 config 参数对象中设置请求头的 Accept 字段和响应实体将要使用的数据类型 arraybuffer.\n使用 export default 对外暴露刚刚创建的 axios 实例 instance.\n\n\n编写 Proto 定义在 src 目录中创建一个名为 protos 的子目录, 并在其中创建一个名为 ExampleResponse.proto 的文件.\n12$ mkdir protos$ touch protos/ExampleResponse.proto\n在 ExampleResponse.proto 文件中, 粘贴如下代码:\n12345678910syntax = &quot;proto3&quot;;message ExampleResponse &#123;    enum Status &#123;        OK = 1;        ERR = 2;    &#125;    optional Status status = 1;    string msg = 2;&#125;\n在这段代码中, 你定义了:\n\n一个 ExampleResponse 类型的 message, 其中包含一个自定义枚举类型的 status 字段和一个 string 类型的 msg 字段.\n将 message 名称与文件名设计为同名, 以便后续可以更方便的加载.\n\n你还需要实现一个使用这个消息定义的接口服务, 使用相同的 proto 定义对数据进行编码\n\n创建一个组件打开 src 目录下的 app.js 文件, 这是由项目工具自动生成的文件, 将其中的代码修改如下:\n1234567891011121314151617181920212223242526272829import &#123; useAxios &#125; from &#x27;../hooks/useAxios&#x27;;import axios from &#x27;../apis/base&#x27;;import ExampleResponse from &#x27;../protos/ExampleResponse.proto&#x27;;function App() &#123;    const [msg, error, loading] = useAxios(&#123;        axiosInstance: axios,        method: &quot;GET&quot;,        url: &quot;/hello/protobuf&quot;,        requestConfig: &#123;            pb: &#123;                response: ExampleResponse,            &#125;        &#125;    &#125;)    return (        &lt;div className=&quot;App&quot;&gt;            &#123;loading &amp;&amp; &lt;p&gt;loading...&lt;/p&gt;&#125;            &#123;!loading &amp;&amp; error &amp;&amp; &lt;p&gt;&#123;error&#125;&lt;/p&gt;&#125;            &#123;!loading &amp;&amp; !error &amp;&amp; response &amp;&amp; &lt;p&gt;&#123;JSON.stringify(msg)&#125;&lt;/p&gt;&#125;        &lt;/div&gt;    );&#125;export default App;\n在这段代码中, 实现的功能如下:\n\n导入了前几步声明的 useAxios Hook, axios 实例, 以及 ExampleResponse.proto 文件.\n在 App 组件中使用 useAxios Hook 发送请求, 在参数对象中指定要求的参数值. 在 requestConfig 中添加一个自定义字段 pb, 里面指定响应所使用的 proto 文件. url 的值和之前声明的 BASE_URL 拼接到一起组成了完整的 api 地址.\n返回组件, 根据 response, error 和 loading 的值决定页面中展示的数据.\n\n\n为 axios 实例添加 interceptors 函数在 apis/base.js 文件中, export default instance 语句的上方, 粘贴如下代码:\n123456789101112131415161718192021222324252627282930313233343536373839404142/** * 移除 object 中指定的 key */ const omit = (obj, uselessKeys) =&gt;  Object.keys(obj).reduce((acc, key) =&gt; &#123;     return uselessKeys.includes(key) ?     acc :     &#123;...acc, key: obj[key]&#125; &#125;, &#123;&#125;);/*** 根据 proto 文件导入后的路径获取 message 类型名称* 要求文件名与主要 message 同名*/const getProtoName = (path) =&gt; &#123; const start = path.lastIndexOf(&quot;/&quot;) + 1; const end = path.indexOf(&quot;.&quot;); return path.substring(start, end);&#125;;/** * 对 protobuf 协议的 response.data 进行解码, 转换成对象返回 */instance.interceptors.response.use(async (response) =&gt; &#123;    const &#123; config &#125; = response;    const &#123; pb &#125; = config;    if (pb.response &amp;&amp; response.data) &#123;        const root = await protobuf.load(pb.response)        const msgType = root.lookupType(getProtoName(pb.response));        const msg = msgType.decode(new Uint8Array(response.data));        const newData = msgType.toObject(msg);        const newRes = omit(response, [&quot;data&quot;]);        return &#123;            ...newRes,            data: newData,        &#125;;    &#125;    return response;&#125;);\n在这段代码中, 实现的功能如下:\n\n声明了一个 omit 函数, 用来移除对象中指定的键值对.\n声明了一个 getProtoName 函数, 用于从导入的 proto 文件中获取文件名, 用于加载 message 类型. \n使用 instance.interceptors.response.use 为 axios 实例添加一个拦截器, 用于在 response 返回给请求者之前对其进行处理. 这里使用了 async 函数, 主要是为了处理 protobuf.load 相关的逻辑. 这里与文档中的用法稍有区别.\n在拦截器函数内部, 使用对象解构的方式获得 response.config 和 response.config.pb 对象, 分别赋值给 config 和 pb 变量. pb 对象是在组件中发起请求时, 添加到 requestConfig 中的自定义对象, 其中包含响应数据所对应的 proto 文件. \n使用 protobufjs 对响应数据进行处理, 在返回前对数据进行解码.\n\n有两点需要注意:\n\n在 protobufjs 的文档中, 示例代码使用 protobuf.load 加载 proto 文件时直接使用字符串类型的文件名作为参数, 但是在 react 的项目中, 实际的文件路径和文件系统中的路径并不一致, 所以直接使用文件系统中的文件路径做参数会导致异常. 这里先在组件中把 proto 文件导入为模块, 再使用模块路径进行加载可以正常运行.\n\n在使用 msgType.decode 对响应实体数据进行解码时, 要求参数使用 Uint8Array 类型, 首先需要进行一次类型转换. 其次, 使用 Uint8Array.from 进行转换时, 无返回值, 会导致后续没有数据. 这里需要使用 new Uint8Array 的方式进行类型转换.\n\n\n\n将组件添加到 App将 src/app.js 中的代码替换为如下内容:\n123456789101112131415import * as React from &#x27;react&#x27;;import ExampleComponent from &#x27;./components/ExampleComponent&#x27;;function App() &#123;    return (        &lt;main className=&quot;App&quot;&gt;            &lt;h1&gt;useAxios Hooks&lt;/h1&gt;            &lt;ExampleComponent /&gt;        &lt;/main&gt;    );&#125;export default App;\n在这段代码中, 实现的功能如下:\n\n声明了 App 组件, 这个组件将作为整个应用的基础\n导入刚刚创建的 ExampleComponent 组件, 并将其添加到 App 中.\n\n\n修改 index.js打开 src/index.js, 使用如下代码替换文件中已有的内容:\n1234567891011import React from &#x27;react&#x27;;import ReactDOM from &#x27;react-dom&#x27;;import &#x27;./index.css&#x27;;import App from &#x27;./App&#x27;;ReactDOM.render(  &lt;React.StrictMode&gt;    &lt;App /&gt;  &lt;/React.StrictMode&gt;,  document.getElementById(&#x27;root&#x27;));\n这段代码, 实现了如下功能:\n\n渲染 App 组件\n\n\n启动项目打开命令行, 进入到项目的根目录, 使用如下命令启动项目:\n1$ npm start\n项目启动完成后, 就可以看到后端返回的 Protobuf 协议数据, 解码后展示在了页面中.\n\n完整代码[Github]示例代码\n示例代码中使用的 api 需要替换为你自己实现的后端 api\n\n参考资料[1] [YouTube]Use Axios with React Hooks for Async-Await Requests[2] [Issue]illegal token ‘&lt;’ (/demo.proto, line 1)[3] [Issue]Uncaught Error: illegal buffer","dateCreated":"2022-06-14T16:00:00+00:00","dateModified":"2022-06-17T13:41:51+00:00","datePublished":"2022-06-14T16:00:00+00:00","description":"","headline":"在 React 项目中使用 Protobuf 协议","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"},"publisher":{"@type":"Organization","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/","keywords":"React, Protobuf, Axios, 前端"}</script>
+    <meta property="og:type" content="blog">
+<meta property="og:title" content="在 React 项目中使用 Protobuf 协议">
+<meta property="og:url" content="https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/">
+<meta property="og:site_name" content="技术与生活">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-06-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-17T13:41:51.920Z">
+<meta property="article:author" content="lihanxuan">
+<meta property="article:tag" content="React">
+<meta property="article:tag" content="Protobuf">
+<meta property="article:tag" content="Axios">
+<meta property="article:tag" content="前端">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://lihanx.github.io/assets/images/profile.jpg"/>
+    
+    
+    
+    
+    <!--STYLES-->
+    
+<link rel="stylesheet" href="/assets/css/style-xauyfozqtqozcpsrphukridnjkr9dhe8pwadzdb0xqjt4tr2luvsk6bxwf84.min.css">
+
+    <!--STYLES END-->
+    
+
+    
+
+    
+        
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a
+            class="header-title-link"
+            href="/"
+            aria-label=""
+        >
+            技术与生活
+        </a>
+    </div>
+    
+        
+            <a
+                class="header-right-picture "
+                href="#about"
+                aria-label="打开链接: /#about"
+            >
+        
+        
+            <img class="header-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a
+                    href="/#about"
+                    aria-label="阅读有关作者的更多信息"
+                >
+                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+                </a>
+                <h4 class="sidebar-profile-name">lihanxuan</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>持续学习, 不断探索</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/"
+                            
+                            rel="noopener"
+                            title="首页"
+                        >
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">首页</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-categories"
+                            
+                            rel="noopener"
+                            title="分类"
+                        >
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">分类</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-tags"
+                            
+                            rel="noopener"
+                            title="标签"
+                        >
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">标签</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="/all-archives"
+                            
+                            rel="noopener"
+                            title="归档"
+                        >
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">归档</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="#about"
+                            
+                            rel="noopener"
+                            title="关于"
+                        >
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">关于</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="https://github.com/lihanx"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="GitHub"
+                        >
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a
+                            class="sidebar-button-link "
+                            href="mailto:lihanx9@163.com"
+                            
+                                target="_blank"
+                            
+                            rel="noopener"
+                            title="邮箱"
+                        >
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">邮箱</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+            <div id="main" data-behavior="5"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            在 React 项目中使用 Protobuf 协议
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2022-06-14T16:00:00+00:00">
+	
+		    2022年 6月 14日
+    	
+    </time>
+    
+        <span>发布在 </span>
+        
+    <a class="category-link" href="/categories/React/">React</a>
+
+
+    
+</div>
+
+    
+</div>
+
+    
+    <div class="post-content markdown">
+        <div class="main-content-wrap">
+            <!-- excerpt -->
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文总结了在 React App 中处理 ProtoBuf 协议的一种方式, 同时包含 React 自定义 Hook, axios interceptors 等内容, 共同组成了前后端交互的相关功能.</p>
+<p>跟随本文的步骤, 可以完整的创建一个独立的示例 App.</p>
+<p>本文主要按照以下几个步骤进行:</p>
+<ol>
+<li>创建 React App</li>
+<li>安装依赖</li>
+<li>创建自定义 Hook</li>
+<li>创建并配置 axios 实例</li>
+<li>编写 Proto 定义</li>
+<li>创建一个组件</li>
+<li>为 axios 实例添加 interceptors 函数</li>
+<li>将组件添加到 App</li>
+<li>修改 index.js</li>
+<li>启动项目</li>
+</ol>
+<p>本文假设你已经有了可以正常运行的 Node.js 环境. 如果还没有, 你可以从 <a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn/download/">官网</a> 进行下载安装.</p>
+<p><br/></p>
+<h2 id="创建-React-App"><a href="#创建-React-App" class="headerlink" title="创建 React App"></a>创建 React App</h2><p>使用 npm 创建一个名为 proto-test 的项目:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npx create-react-app proto-test</span><br></pre></td></tr></table></figure>
+<p><em>按照<a target="_blank" rel="noopener" href="https://github.com/facebook/create-react-app">文档</a>的推荐, 无需预先安装 create-react-app 工具, 并且建议先卸载全局安装的 create-react-app</em></p>
+<p><em>创建项目并安装依赖的过程可能会持续几分钟, 请耐心等待</em></p>
+<p><br/></p>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><p>首先进入 proto-test 目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> proto-test</span><br></pre></td></tr></table></figure>
+<p>由于 React 18 版本相关依赖存在一些原因未知的问题, 这里使用 React 17 版本.<br>通过修改 package.json 文件指定依赖版本, 将 package.json 文件中的 <code>dependencies</code> 值改为如下内容:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&quot;dependencies&quot;: &#123;</span><br><span class="line">  &quot;protobufjs&quot;: &quot;^6.11.3&quot;,</span><br><span class="line">  &quot;axios&quot;: &quot;^0.25.0&quot;,</span><br><span class="line">  &quot;react&quot;: &quot;^17.0.2&quot;,</span><br><span class="line">  &quot;react-dom&quot;: &quot;^17.0.2&quot;,</span><br><span class="line">  &quot;react-scripts&quot;: &quot;5.0.0&quot;,</span><br><span class="line">  &quot;web-vitals&quot;: &quot;^2.1.4&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>保存 package.json 文件后, 使用如下命令安装全部依赖</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm i</span><br></pre></td></tr></table></figure>
+<p>注意: Protobufjs 文档中给出的相关示例, 并不完全适用于 react app, 原文档仅供参考.</p>
+<p><em><a target="_blank" rel="noopener" href="https://axios-http.com/">Axios 文档</a></em><br><em><a target="_blank" rel="noopener" href="https://github.com/protobufjs/protobuf.js">Protobufjs 文档</a></em>  </p>
+<p><br/></p>
+<h2 id="创建自定义-Hook"><a href="#创建自定义-Hook" class="headerlink" title="创建自定义 Hook"></a>创建自定义 Hook</h2><p>首先, 我们在项目的 src 目录下创建一个名为 hooks 子目录, 并在其中创建一个名为 useAxios.js 的文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> src</span><br><span class="line">$ mkdir hooks</span><br><span class="line">$ touch hooks/useAxios.js</span><br></pre></td></tr></table></figure>
+<p>使用文本编辑器打开 useAxios.js 文件, 向其中粘贴如下代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; useState, useEffect &#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> useAxios = <span class="function">(<span class="params">configObj</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123;</span><br><span class="line">        axiosInstance,</span><br><span class="line">        method,</span><br><span class="line">        url,</span><br><span class="line">        requestConfig = &#123;&#125;,</span><br><span class="line">    &#125; = configObj;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> [response, setResponse] = useState([]);</span><br><span class="line">    <span class="keyword">const</span> [error, setError] = useState(<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    <span class="keyword">const</span> [loading, setLoading] = useState(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">    useEffect(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> controller = <span class="keyword">new</span> AbortController();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> fetchData = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">const</span> res = <span class="keyword">await</span> axiosInstance[method.toLowerCase()](url, &#123;</span><br><span class="line">                    ...requestConfig,</span><br><span class="line">                    signal: controller.signal</span><br><span class="line">                &#125;);</span><br><span class="line">                setResponse(res.data);</span><br><span class="line">            &#125; <span class="function"><span class="title">catch</span>(<span class="params">err</span>)</span> &#123;</span><br><span class="line">                <span class="built_in">console</span>.log(err.message);</span><br><span class="line">                setError(err.message);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                setLoading(<span class="literal">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        fetchData();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="function">() =&gt;</span> controller.abort();</span><br><span class="line">    &#125;, []);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [response, error, loading];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> useAxios;</span><br></pre></td></tr></table></figure>
+<p>这段代码主要实现的功能如下:</p>
+<ul>
+<li>使用箭头函数语法声明一个函数, 并赋值给 <code>useAxios</code> 变量;</li>
+<li>对参数 <code>configObj</code> 进行解构赋值(Destructuring Assignment), 获得 <code>axiosInstance</code>, <code>method</code>, <code>url</code>, <code>requestConfig</code> 四个变量, 并为 <code>requestConfig</code> 设置默认值.</li>
+<li>分别使用 <code>useState</code> Hook 设置了三个局部状态变量 <code>response</code>, <code>error</code>, <code>loading</code>.</li>
+<li>在 <code>useEffect</code> Hook 中使用 axios 执行请求, 并更新局部状态变量. 返回一个使用 <code>controller</code> 清除状态的函数.</li>
+<li>返回 <code>response</code>, <code>error</code>, <code>loading</code> 三个变量.</li>
+<li>使用 <code>export default</code> 对外暴露刚刚声明的 <code>useAxios</code> 变量.</li>
+</ul>
+<p><br/></p>
+<h2 id="创建并配置-axios-实例"><a href="#创建并配置-axios-实例" class="headerlink" title="创建并配置 axios 实例"></a>创建并配置 axios 实例</h2><p>在 src 目录下创建一个名为 apis 的子目录, 并在其中创建一个名为 base.js 的文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir apis</span><br><span class="line">$ touch apis/base.js</span><br></pre></td></tr></table></figure>
+<p>向 base.js 中粘贴如下代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> protobuf <span class="keyword">from</span> <span class="string">&#x27;protobufjs&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> BASE_URL = <span class="string">&#x27;http://192.168.0.106:8080/api/v1/&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> instance = axios.create(&#123;</span><br><span class="line">    baseURL: BASE_URL,</span><br><span class="line">    headers: &#123;</span><br><span class="line">        <span class="string">&#x27;Accept&#x27;</span>: <span class="string">&#x27;application/x-protobuf&#x27;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    responseType: <span class="string">&#x27;arraybuffer&#x27;</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> instance;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中, 实现的功能如下:</p>
+<ul>
+<li>设置了全局常量 <code>BASE_URL</code>, 这是你将要请求的接口 url 的通用前缀.</li>
+<li>创建了一个 axios 实例并赋值给 <code>instance</code> 变量, 并在传入的 config 参数对象中设置请求头的 <code>Accept</code> 字段和响应实体将要使用的数据类型 <code>arraybuffer</code>.</li>
+<li>使用 <code>export default</code> 对外暴露刚刚创建的 axios 实例 <code>instance</code>.</li>
+</ul>
+<p><br/></p>
+<h2 id="编写-Proto-定义"><a href="#编写-Proto-定义" class="headerlink" title="编写 Proto 定义"></a>编写 Proto 定义</h2><p>在 src 目录中创建一个名为 protos 的子目录, 并在其中创建一个名为 ExampleResponse.proto 的文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir protos</span><br><span class="line">$ touch protos/ExampleResponse.proto</span><br></pre></td></tr></table></figure>
+<p>在 ExampleResponse.proto 文件中, 粘贴如下代码:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">syntax = &quot;proto3&quot;;</span><br><span class="line"></span><br><span class="line">message ExampleResponse &#123;</span><br><span class="line">    enum Status &#123;</span><br><span class="line">        OK = 1;</span><br><span class="line">        ERR = 2;</span><br><span class="line">    &#125;</span><br><span class="line">    optional Status status = 1;</span><br><span class="line">    string msg = 2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中, 你定义了:</p>
+<ul>
+<li>一个 <code>ExampleResponse</code> 类型的 message, 其中包含一个自定义枚举类型的 <code>status</code> 字段和一个 string 类型的 <code>msg</code> 字段.</li>
+<li>将 message 名称与文件名设计为同名, 以便后续可以更方便的加载.</li>
+</ul>
+<p><em>你还需要实现一个使用这个消息定义的接口服务, 使用相同的 proto 定义对数据进行编码</em></p>
+<p><br/></p>
+<h2 id="创建一个组件"><a href="#创建一个组件" class="headerlink" title="创建一个组件"></a>创建一个组件</h2><p>打开 src 目录下的 app.js 文件, 这是由项目工具自动生成的文件, 将其中的代码修改如下:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; useAxios &#125; <span class="keyword">from</span> <span class="string">&#x27;../hooks/useAxios&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;../apis/base&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> ExampleResponse <span class="keyword">from</span> <span class="string">&#x27;../protos/ExampleResponse.proto&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> [msg, error, loading] = useAxios(&#123;</span><br><span class="line">        axiosInstance: axios,</span><br><span class="line">        method: <span class="string">&quot;GET&quot;</span>,</span><br><span class="line">        url: <span class="string">&quot;/hello/protobuf&quot;</span>,</span><br><span class="line">        requestConfig: &#123;</span><br><span class="line">            pb: &#123;</span><br><span class="line">                response: ExampleResponse,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div className=<span class="string">&quot;App&quot;</span>&gt;</span><br><span class="line">            &#123;loading &amp;&amp; <span class="xml"><span class="tag">&lt;<span class="name">p</span>&gt;</span>loading...<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span>&#125;</span><br><span class="line"></span><br><span class="line">            &#123;!loading &amp;&amp; error &amp;&amp; <span class="xml"><span class="tag">&lt;<span class="name">p</span>&gt;</span>&#123;error&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span>&#125;</span><br><span class="line"></span><br><span class="line">            &#123;!loading &amp;&amp; !error &amp;&amp; response &amp;&amp; <span class="xml"><span class="tag">&lt;<span class="name">p</span>&gt;</span>&#123;JSON.stringify(msg)&#125;<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span>&#125;</span><br><span class="line">        &lt;/div&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> App;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中, 实现的功能如下:</p>
+<ul>
+<li>导入了前几步声明的 <code>useAxios</code> Hook, axios 实例, 以及 ExampleResponse.proto 文件.</li>
+<li>在 App 组件中使用 <code>useAxios</code> Hook 发送请求, 在参数对象中指定要求的参数值. 在 <code>requestConfig</code> 中添加一个自定义字段 <code>pb</code>, 里面指定响应所使用的 proto 文件. url 的值和之前声明的 BASE_URL 拼接到一起组成了完整的 api 地址.</li>
+<li>返回组件, 根据 <code>response</code>, <code>error</code> 和 <code>loading</code> 的值决定页面中展示的数据.</li>
+</ul>
+<p><br/></p>
+<h2 id="为-axios-实例添加-interceptors-函数"><a href="#为-axios-实例添加-interceptors-函数" class="headerlink" title="为 axios 实例添加 interceptors 函数"></a>为 axios 实例添加 interceptors 函数</h2><p>在 apis/base.js 文件中, <code>export default instance</code> 语句的上方, 粘贴如下代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 移除 object 中指定的 key</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="keyword">const</span> omit = <span class="function">(<span class="params">obj, uselessKeys</span>) =&gt;</span> </span><br><span class="line"> <span class="built_in">Object</span>.keys(obj).reduce(<span class="function">(<span class="params">acc, key</span>) =&gt;</span> &#123;</span><br><span class="line">     <span class="keyword">return</span> uselessKeys.includes(key) ?</span><br><span class="line">     acc :</span><br><span class="line">     &#123;...acc, <span class="attr">key</span>: obj[key]&#125;</span><br><span class="line"> &#125;, &#123;&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 根据 proto 文件导入后的路径获取 message 类型名称</span></span><br><span class="line"><span class="comment">* 要求文件名与主要 message 同名</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">const</span> getProtoName = <span class="function">(<span class="params">path</span>) =&gt;</span> &#123;</span><br><span class="line"> <span class="keyword">const</span> start = path.lastIndexOf(<span class="string">&quot;/&quot;</span>) + <span class="number">1</span>;</span><br><span class="line"> <span class="keyword">const</span> end = path.indexOf(<span class="string">&quot;.&quot;</span>);</span><br><span class="line"> <span class="keyword">return</span> path.substring(start, end);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 对 protobuf 协议的 response.data 进行解码, 转换成对象返回</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">instance.interceptors.response.use(<span class="keyword">async</span> (response) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; config &#125; = response;</span><br><span class="line">    <span class="keyword">const</span> &#123; pb &#125; = config;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (pb.response &amp;&amp; response.data) &#123;</span><br><span class="line">        <span class="keyword">const</span> root = <span class="keyword">await</span> protobuf.load(pb.response)</span><br><span class="line">        <span class="keyword">const</span> msgType = root.lookupType(getProtoName(pb.response));</span><br><span class="line">        <span class="keyword">const</span> msg = msgType.decode(<span class="keyword">new</span> <span class="built_in">Uint8Array</span>(response.data));</span><br><span class="line">        <span class="keyword">const</span> newData = msgType.toObject(msg);</span><br><span class="line">        <span class="keyword">const</span> newRes = omit(response, [<span class="string">&quot;data&quot;</span>]);</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            ...newRes,</span><br><span class="line">            data: newData,</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在这段代码中, 实现的功能如下:</p>
+<ul>
+<li>声明了一个 <code>omit</code> 函数, 用来移除对象中指定的键值对.</li>
+<li>声明了一个 <code>getProtoName</code> 函数, 用于从导入的 proto 文件中获取文件名, 用于加载 message 类型. </li>
+<li>使用 <code>instance.interceptors.response.use</code> 为 axios 实例添加一个拦截器, 用于在 <code>response</code> 返回给请求者之前对其进行处理. 这里使用了 async 函数, 主要是为了处理 <code>protobuf.load</code> 相关的逻辑. 这里与文档中的用法稍有区别.</li>
+<li>在拦截器函数内部, 使用对象解构的方式获得 <code>response.config</code> 和 <code>response.config.pb</code> 对象, 分别赋值给 <code>config</code> 和 <code>pb</code> 变量. <code>pb</code> 对象是在组件中发起请求时, 添加到 requestConfig 中的自定义对象, 其中包含响应数据所对应的 proto 文件. </li>
+<li>使用 protobufjs 对响应数据进行处理, 在返回前对数据进行解码.</li>
+</ul>
+<p>有两点需要注意:</p>
+<ul>
+<li><p>在 protobufjs 的文档中, 示例代码使用 <code>protobuf.load</code> 加载 proto 文件时直接使用字符串类型的文件名作为参数, 但是在 react 的项目中, 实际的文件路径和文件系统中的路径并不一致, 所以直接使用文件系统中的文件路径做参数会导致异常. 这里先在组件中把 proto 文件导入为模块, 再使用模块路径进行加载可以正常运行.</p>
+</li>
+<li><p>在使用 <code>msgType.decode</code> 对响应实体数据进行解码时, 要求参数使用 <code>Uint8Array</code> 类型, 首先需要进行一次类型转换. 其次, 使用 <code>Uint8Array.from</code> 进行转换时, 无返回值, 会导致后续没有数据. 这里需要使用 <code>new Uint8Array</code> 的方式进行类型转换.</p>
+</li>
+</ul>
+<p><br/></p>
+<h2 id="将组件添加到-App"><a href="#将组件添加到-App" class="headerlink" title="将组件添加到 App"></a>将组件添加到 App</h2><p>将 src/app.js 中的代码替换为如下内容:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ExampleComponent <span class="keyword">from</span> <span class="string">&#x27;./components/ExampleComponent&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;main className=<span class="string">&quot;App&quot;</span>&gt;</span><br><span class="line">            &lt;h1&gt;useAxios Hooks&lt;/h1&gt;</span><br><span class="line">            &lt;ExampleComponent /&gt;</span><br><span class="line">        &lt;/main&gt;</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> App;</span><br></pre></td></tr></table></figure>
+<p>在这段代码中, 实现的功能如下:</p>
+<ul>
+<li>声明了 App 组件, 这个组件将作为整个应用的基础</li>
+<li>导入刚刚创建的 <code>ExampleComponent</code> 组件, 并将其添加到 App 中.</li>
+</ul>
+<p><br/></p>
+<h2 id="修改-index-js"><a href="#修改-index-js" class="headerlink" title="修改 index.js"></a>修改 index.js</h2><p>打开 src/index.js, 使用如下代码替换文件中已有的内容:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">&#x27;react-dom&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;./index.css&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">&#x27;./App&#x27;</span>;</span><br><span class="line"></span><br><span class="line">ReactDOM.render(</span><br><span class="line">  &lt;React.StrictMode&gt;</span><br><span class="line">    &lt;App /&gt;</span><br><span class="line">  &lt;/React.StrictMode&gt;,</span><br><span class="line">  <span class="built_in">document</span>.getElementById(<span class="string">&#x27;root&#x27;</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>这段代码, 实现了如下功能:</p>
+<ul>
+<li>渲染 App 组件</li>
+</ul>
+<p><br/></p>
+<h2 id="启动项目"><a href="#启动项目" class="headerlink" title="启动项目"></a>启动项目</h2><p>打开命令行, 进入到项目的根目录, 使用如下命令启动项目:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm start</span><br></pre></td></tr></table></figure>
+<p>项目启动完成后, 就可以看到后端返回的 Protobuf 协议数据, 解码后展示在了页面中.</p>
+<p><br/></p>
+<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p><a target="_blank" rel="noopener" href="https://github.com/lihanx/proto-test">[Github]示例代码</a></p>
+<p><em>示例代码中使用的 api 需要替换为你自己实现的后端 api</em></p>
+<p><br/></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[1] <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=NqdqnfzOQFE">[YouTube]Use Axios with React Hooks for Async-Await Requests</a><br>[2] <a target="_blank" rel="noopener" href="https://github.com/protobufjs/protobuf.js/issues/1023">[Issue]illegal token ‘&lt;’ (/demo.proto, line 1)</a><br>[3] <a target="_blank" rel="noopener" href="https://github.com/protobufjs/protobuf.js/issues/806">[Issue]Uncaught Error: illegal buffer</a></p>
+            
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">标签</span><br/>
+                
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Axios/" rel="tag">Axios</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Protobuf/" rel="tag">Protobuf</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/React/" rel="tag">React</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag">前端</a>
+
+            </div>
+        
+        
+            <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2022/06/09/golang/database-access/"
+                    data-tooltip="使用 Golang 访问关系型数据库(译)"
+                    aria-label="下一篇: 使用 Golang 访问关系型数据库(译)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        
+            
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2022 lihanxuan. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
+                        <i class="fa fa-angle-left" aria-hidden="true"></i>
+                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
+                    </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2022/06/09/golang/database-access/"
+                    data-tooltip="使用 Golang 访问关系型数据库(译)"
+                    aria-label="下一篇: 使用 Golang 访问关系型数据库(译)"
+                >
+                    
+                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
+                        <i class="fa fa-angle-right" aria-hidden="true"></i>
+                    </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a
+                class="post-action-btn btn btn--default btn-open-shareoptions"
+                href="#btn-open-shareoptions"
+                aria-label="Share this post"
+            >
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Facebook"
+                    aria-label="分享到 Facebook"
+                >
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Twitter"
+                    aria-label="分享到 Twitter"
+                >
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a
+                    class="post-action-btn btn btn--default"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                    title="分享到 Google+"
+                    aria-label="分享到 Google+"
+                >
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                
+    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+        <i id="btn-close-shareoptions" class="fa fa-times"></i>
+        <ul class="share-options">
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                        aria-label="分享到 Facebook"
+                    >
+                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                        aria-label="分享到 Twitter"
+                    >
+                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
+                    </a>
+                </li>
+            
+                
+                
+                <li class="share-option">
+                    <a
+                        class="share-option-btn"
+                        target="new"
+                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/14/react/using-protobuf-in-react-application/"
+                        aria-label="分享到 Google+"
+                    >
+                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
+                    </a>
+                </li>
+            
+        </ul>
+    </div>
+
+
+            
+        </div>
+        
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
+        
+            <h4 id="about-card-name">lihanxuan</h4>
+        
+            <div id="about-card-bio"><p>持续学习, 不断探索</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Python 开发工程师</p>
+
+            </div>
+        
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
+        <!--SCRIPTS-->
+
+<script src="/assets/js/script-pwcx44shgfco2srkcnhh8knfc88726ymos4auiuwmqt6fcetpnkbnhqtt4ce.min.js"></script>
+
+<!--SCRIPTS END-->
+
+
+    
+
+
+
+
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
