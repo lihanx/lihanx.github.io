@@ -6,24 +6,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="技术与生活">
-    <title>上弦月(初八) - 技术与生活</title>
+    <title>在 Mac OS 上创建 Android 虚拟设备 - 技术与生活</title>
     <meta name="author" content="lihanxuan">
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n\n设备: Explore Scientific 152/1900 mm 马卡 + EXOS-2 Goto 赤道仪相机: 尼康 D700时间: 2022-06-06 晚地点: 小区南侧内部道路(无路灯)\n\n难得的好天气, 北斗七星清晰可见, 由于匆忙没来得及精确校准下一次学习使用极轴镜对极轴, 尝试一星校准\n","dateCreated":"2022-06-05T16:00:00+00:00","dateModified":"2022-06-07T11:29:03+00:00","datePublished":"2022-06-05T16:00:00+00:00","description":"","headline":"上弦月(初八)","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"},"publisher":{"@type":"Organization","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/","keywords":"天文摄影"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n前言当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器.\n使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要好, 不需要 Arm Translator 一类的东西, 性能也还不错, 虽然有些诡异的应用还是不能正常运行, 但是也能临时应付一下没有实体设备的场景.\n下面就具体介绍一下安装方式.\n\n安装 SDK使用 home-brew 安装 jdk 和 android-sdk\n12$ brew install openjdk@8$ brew install android-sdk\n\n设置环境变量将项目启动依赖的环境变量设置一下, 然后还需要将 emulator 所在的目录添加到环境变量 PATH 中\n1234$ export ANDROID_SDK_ROOT=/usr/local/share/android-sdk/$ export JAVA_HOME=/usr/local/Cellar/openjdk@8/1.8.0+322/$ export ANDROID_AVD_HOME=$HOME/.android/avd$ export PATH=$ANDROID_SDK_ROOT/emulator:$PATH\n这里 openjdk@8 子目录的名称需要手动确认, 版本号可能随着时间的推移发生变更\n\n安装 Android SDK 组件在下载安装 Android 系统之前, 还需要安装必要的组件\n1$ sdkmanager &quot;platform-tools&quot;\n我们可以再查看一下可选用的系统版本列表\n1$ sdkmanager --list | grep system-images\n\n选择并安装 Android 系统选择好系统之后, 我们可以选择安装指定版本的 Android API 和系统镜像\n12$ sdkmanager &quot;platforms;android-30&quot;$ sdkmanager --install &quot;system-images;android-30;google_apis;x86_64&quot;\n\n创建虚拟设备完成上述所有准备工作后, 就可以开始创建一台 Android 虚拟设备了\n1$ echo &quot;no&quot; | avdmanager --verbose create avd --force --name &quot;android11&quot; --package &quot;system-images;android-30;google_apis;x86_64&quot; --tag &quot;google_apis&quot; --abi &quot;x86_64&quot;\n\n提前配置启动参数如果直接启动的话, 还需要通过命令行添加一些参数.为了方便, 可以将这些常用参数直接写入配置文件中, 避免每次设置.\n将如下几行配置追加到 $ANDROID_AVD_HOME/android11.avd/config.ini 文件中\n123skin.name=1080x1920hw.lcd.density=480hw.keyboard=yes\n\n启动虚拟设备接下来就可以根据配置的设备名称, 启动虚拟设备了.\n12$ cd $ANDROID_SDK_ROOT/emulator$ emulator -avd android11\n这里有个遗留问题是, 虽然我们已经将 emulator 的目录添加到了环境变量中, 但是在任意位置启动时会抛出异常, 解决办法是先 cd 进 emulator 的目录, 然后再启动, 不知道这个问题以后会不会修复\n这样, 我们就成功的在 Mac OS 上创建了一台可以用于调试的 Android 虚拟设备.之后就可以使用 ADB 或者直接拖动 apk 文件到虚拟设备安装应用了.\n\n附注\n由于不同的镜像或 Android API 版本最终能获得的权限不同, 如果需要 root 权限还需要自行测试, 本文使用的示例是经过测试可以获取 root 权限的.\n特定的 Android 9 和任意版本的 Android 11 镜像已经默认支持 ARM 指令集的应用.\n更多详细内容可以参考 Android Studio Emulator相关的文档.\n会有一些诡异的应用无法安装或者无法启动, 需要尝试才能知道.\n\n\n参考资料[1] Install and Create Emulators using AVDMANAGER and SDKMANAGER[2] Android Studio - Command line tools[3] Android Studio - Start the emulator from the command line[4] Support for ARM binaries on Android 9 and 11 system images","dateCreated":"2022-07-13T07:28:13+00:00","dateModified":"2022-07-13T10:46:56+00:00","datePublished":"2022-07-13T07:28:13+00:00","description":"","headline":"在 Mac OS 上创建 Android 虚拟设备","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"},"publisher":{"@type":"Organization","name":"lihanxuan","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/","keywords":"爬虫"}</script>
     <meta property="og:type" content="blog">
-<meta property="og:title" content="上弦月(初八)">
-<meta property="og:url" content="https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/">
+<meta property="og:title" content="在 Mac OS 上创建 Android 虚拟设备">
+<meta property="og:url" content="https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/">
 <meta property="og:site_name" content="技术与生活">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/20220606_first_quarter_moon.jpeg">
-<meta property="article:published_time" content="2022-06-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-06-07T11:29:03.692Z">
+<meta property="article:published_time" content="2022-07-13T07:28:13.000Z">
+<meta property="article:modified_time" content="2022-07-13T10:46:56.683Z">
 <meta property="article:author" content="lihanxuan">
-<meta property="article:tag" content="天文摄影">
+<meta property="article:tag" content="爬虫">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/20220606_first_quarter_moon.jpeg">
     
     
         
@@ -244,20 +242,20 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            上弦月(初八)
+            在 Mac OS 上创建 Android 虚拟设备
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2022-06-05T16:00:00+00:00">
+    <time datetime="2022-07-13T07:28:13+00:00">
 	
-		    2022年 6月 05日
+		    2022年 7月 13日
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/%E5%A4%A9%E6%96%87%E6%91%84%E5%BD%B1/">天文摄影</a>
+    <a class="category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
 
 
     
@@ -270,11 +268,45 @@
     <div class="post-content markdown">
         <div class="main-content-wrap">
             <!-- excerpt -->
-<p><img src="20220606_first_quarter_moon.jpeg" alt=""></p>
-<p>设备: Explore Scientific 152/1900 mm 马卡 + EXOS-2 Goto 赤道仪<br>相机: 尼康 D700<br>时间: 2022-06-06 晚<br>地点: 小区南侧内部道路(无路灯)</p>
-<blockquote>
-<p>难得的好天气, 北斗七星清晰可见, 由于匆忙没来得及精确校准<br>下一次学习使用极轴镜对极轴, 尝试一星校准</p>
-</blockquote>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.<br>机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器.</p>
+<p>使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要好, 不需要 Arm Translator 一类的东西, 性能也还不错, 虽然有些诡异的应用还是不能正常运行, 但是也能临时应付一下没有实体设备的场景.</p>
+<p>下面就具体介绍一下安装方式.</p>
+<p><br/></p>
+<h2 id="安装-SDK"><a href="#安装-SDK" class="headerlink" title="安装 SDK"></a>安装 SDK</h2><p>使用 home-brew 安装 jdk 和 android-sdk</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ brew install openjdk@8</span><br><span class="line">$ brew install android-sdk</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="设置环境变量"><a href="#设置环境变量" class="headerlink" title="设置环境变量"></a>设置环境变量</h2><p>将项目启动依赖的环境变量设置一下, 然后还需要将 emulator 所在的目录添加到环境变量 PATH 中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> ANDROID_SDK_ROOT=/usr/<span class="built_in">local</span>/share/android-sdk/</span><br><span class="line">$ <span class="built_in">export</span> JAVA_HOME=/usr/<span class="built_in">local</span>/Cellar/openjdk@8/1.8.0+322/</span><br><span class="line">$ <span class="built_in">export</span> ANDROID_AVD_HOME=<span class="variable">$HOME</span>/.android/avd</span><br><span class="line">$ <span class="built_in">export</span> PATH=<span class="variable">$ANDROID_SDK_ROOT</span>/emulator:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+<p><em>这里 openjdk@8 子目录的名称需要手动确认, 版本号可能随着时间的推移发生变更</em></p>
+<p><br/></p>
+<h2 id="安装-Android-SDK-组件"><a href="#安装-Android-SDK-组件" class="headerlink" title="安装 Android SDK 组件"></a>安装 Android SDK 组件</h2><p>在下载安装 Android 系统之前, 还需要安装必要的组件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sdkmanager <span class="string">&quot;platform-tools&quot;</span></span><br></pre></td></tr></table></figure>
+<p>我们可以再查看一下可选用的系统版本列表</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sdkmanager --list | grep system-images</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="选择并安装-Android-系统"><a href="#选择并安装-Android-系统" class="headerlink" title="选择并安装 Android 系统"></a>选择并安装 Android 系统</h2><p>选择好系统之后, 我们可以选择安装指定版本的 Android API 和系统镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sdkmanager <span class="string">&quot;platforms;android-30&quot;</span></span><br><span class="line">$ sdkmanager --install <span class="string">&quot;system-images;android-30;google_apis;x86_64&quot;</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="创建虚拟设备"><a href="#创建虚拟设备" class="headerlink" title="创建虚拟设备"></a>创建虚拟设备</h2><p>完成上述所有准备工作后, 就可以开始创建一台 Android 虚拟设备了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">&quot;no&quot;</span> | avdmanager --verbose create avd --force --name <span class="string">&quot;android11&quot;</span> --package <span class="string">&quot;system-images;android-30;google_apis;x86_64&quot;</span> --tag <span class="string">&quot;google_apis&quot;</span> --abi <span class="string">&quot;x86_64&quot;</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="提前配置启动参数"><a href="#提前配置启动参数" class="headerlink" title="提前配置启动参数"></a>提前配置启动参数</h2><p>如果直接启动的话, 还需要通过命令行添加一些参数.<br>为了方便, 可以将这些常用参数直接写入配置文件中, 避免每次设置.</p>
+<p>将如下几行配置追加到 <code>$ANDROID_AVD_HOME/android11.avd/config.ini</code> 文件中</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">skin.name=1080x1920</span><br><span class="line">hw.lcd.density=480</span><br><span class="line">hw.keyboard=yes</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="启动虚拟设备"><a href="#启动虚拟设备" class="headerlink" title="启动虚拟设备"></a>启动虚拟设备</h2><p>接下来就可以根据配置的设备名称, 启动虚拟设备了.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> <span class="variable">$ANDROID_SDK_ROOT</span>/emulator</span><br><span class="line">$ emulator -avd android11</span><br></pre></td></tr></table></figure>
+<p><em>这里有个遗留问题是, 虽然我们已经将 emulator 的目录添加到了环境变量中, 但是在任意位置启动时会抛出异常, 解决办法是先 cd 进 emulator 的目录, 然后再启动, 不知道这个问题以后会不会修复</em></p>
+<p>这样, 我们就成功的在 Mac OS 上创建了一台可以用于调试的 Android 虚拟设备.<br>之后就可以使用 ADB 或者直接拖动 apk 文件到虚拟设备安装应用了.</p>
+<p><br/></p>
+<h2 id="附注"><a href="#附注" class="headerlink" title="附注"></a>附注</h2><ol>
+<li>由于不同的镜像或 Android API 版本最终能获得的权限不同, 如果需要 root 权限还需要自行测试, 本文使用的示例是经过测试可以获取 root 权限的.</li>
+<li>特定的 Android 9 和任意版本的 Android 11 镜像已经默认支持 ARM 指令集的应用.</li>
+<li>更多详细内容可以参考 Android Studio <a target="_blank" rel="noopener" href="https://developer.android.com/studio/run/emulator">Emulator</a>相关的文档.</li>
+<li>会有一些诡异的应用无法安装或者无法启动, 需要尝试才能知道.</li>
+</ol>
+<p><br/></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[1] <a target="_blank" rel="noopener" href="https://gist.github.com/mrk-han/66ac1a724456cadf1c93f4218c6060ae">Install and Create Emulators using AVDMANAGER and SDKMANAGER</a><br>[2] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/command-line">Android Studio - Command line tools</a><br>[3] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/run/emulator-commandline">Android Studio - Start the emulator from the command line</a><br>[4] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/releases/emulator#support_for_arm_binaries_on_android_9_and_11_system_images">Support for ARM binaries on Android 9 and 11 system images</a></p>
             
 
 
@@ -285,7 +317,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%A4%A9%E6%96%87%E6%91%84%E5%BD%B1/" rel="tag">天文摄影</a>
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a>
 
             </div>
         
@@ -295,14 +327,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/06/06/golang/getting-started-with-generics/"
-                    data-tooltip="Golang 泛型入门(译)"
-                    aria-label="上一篇: Golang 泛型入门(译)"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -312,9 +341,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/05/24/astro-photography/magnitude-and-surface-brightness/"
-                    data-tooltip="视星等与面亮度(译)"
-                    aria-label="下一篇: 视星等与面亮度(译)"
+                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
+                    data-tooltip="土星"
+                    aria-label="下一篇: 土星"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -339,7 +368,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -352,7 +381,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -365,7 +394,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -410,14 +439,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/06/06/golang/getting-started-with-generics/"
-                    data-tooltip="Golang 泛型入门(译)"
-                    aria-label="上一篇: Golang 泛型入门(译)"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -427,9 +453,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/05/24/astro-photography/magnitude-and-surface-brightness/"
-                    data-tooltip="视星等与面亮度(译)"
-                    aria-label="下一篇: 视星等与面亮度(译)"
+                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
+                    data-tooltip="土星"
+                    aria-label="下一篇: 土星"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -454,7 +480,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -467,7 +493,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -480,7 +506,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -514,7 +540,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -527,7 +553,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -540,7 +566,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/06/05/astro-photography/2022-06-06-first-quarter-moon/"
+                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
