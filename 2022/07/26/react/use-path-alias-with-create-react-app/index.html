@@ -6,24 +6,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="技术与生活">
-    <title>柏拉图环形山与阿尔卑斯谷 - 技术与生活</title>
+    <title>在 React CRA 项目中使用 Alias 简化模块导入 - 技术与生活</title>
     <meta name="author" content="李瀚翾">
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n\n设备: Explore Scientific 152/1900 mm 马卡 + EXOS-2 Goto 赤道仪相机: ZWO ASI385MC时间: 2022-07-10 晚地点: 南阳台\n\n主要地标包括:\n\n柏拉图环形山\n阿尔卑斯山脉\n阿尔卑斯谷\n卡西尼环形山\n雨海(左下)\n冷海(右上)\n","dateCreated":"2022-07-11T05:29:53+00:00","dateModified":"2022-07-26T06:40:41+00:00","datePublished":"2022-07-11T05:29:53+00:00","description":"","headline":"柏拉图环形山与阿尔卑斯谷","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/","keywords":"天文摄影"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n问题在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：\n12import Nav from &quot;./_partial/Nav&quot;;import PostRepository from &quot;../Repository/PostRepository&quot;;\n这样看起来似乎没什么问题。\n但是当项目变得复杂后，要么，所有的文件都平铺在一个目录中；要么，就会出现多级嵌套的目录结构，导入模块就可能演变成：\n1import Footer from &quot;../../../component/_partial/Footer&quot;;\n导入模块变得越来越复杂，而问题似乎又不可避免。\n那么有没有什么方式可以让我们简化导入语句，同时又不影响对依赖模块的查找呢？\n这就是 alias 可以发挥作用的时候了。\n\n解决方法默认情况下，使用 Create-React-App 创建的项目是使用 webpack 进行打包的，在 webpack 的配置中，我们可以设置 alias 项，通过一个简单符号替换公共的路径前缀，比如 ~。\n我们需要在项目根目录的 config/webpack.config.js 中修改这个配置项，但是 config 目录默认是不存在的，需要先在项目的根目录下运行，将 webpack 所有的配置项生成到 config 目录中。\n1$ npm run eject\n如果项目存在未提交的内容，根据提示，需要先进行 commit，然后才能继续运行此命令.\n\n关于 npm run eject 命令，请查看官方文档\n\n执行完成后，就可以在项目的根目录下看到 config 子目录了。\n然后打开 config/webpack.config.js 文件，在变量声明区域追加一行\n1const basePath = path.resolve(__dirname, &quot;../src&quot;);\n通常 path 模块已经被导入了，不过最好还是再进行一下确认\n然后我们在向外暴露的函数中，找到最后 return 的巨大 object 里面的 resolve.alias 一项，向里面添加一组键值对。\n123456...alias: &#123;    &quot;~&quot;: basePath,  // 添加这一行    ...&#125;...\n修改后，就可以使用 ~ 作为前缀去导入内部组件了。\n1import Footer from &quot;~/component/_partial/Footer&quot;;\n上述的修改，会让 webpack 在打包时，使用 basePath 的值（我这里使用的是 src 目录的绝对路径）替换 ~ 符号，然后使用绝对路径去寻找依赖的组件。\n这样就解决了导入路径繁琐的问题。","dateCreated":"2022-07-26T05:57:46+00:00","dateModified":"2022-07-26T07:02:54+00:00","datePublished":"2022-07-26T05:57:46+00:00","description":"","headline":"在 React CRA 项目中使用 Alias 简化模块导入","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/","keywords":"React, Create-React-App, Import Path Alias"}</script>
     <meta property="og:type" content="blog">
-<meta property="og:title" content="柏拉图环形山与阿尔卑斯谷">
-<meta property="og:url" content="https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/">
+<meta property="og:title" content="在 React CRA 项目中使用 Alias 简化模块导入">
+<meta property="og:url" content="https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/">
 <meta property="og:site_name" content="技术与生活">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/2022-07-10-plato-and-vallis-alpes.jpeg">
-<meta property="article:published_time" content="2022-07-11T05:29:53.000Z">
-<meta property="article:modified_time" content="2022-07-26T06:40:41.426Z">
+<meta property="article:published_time" content="2022-07-26T05:57:46.000Z">
+<meta property="article:modified_time" content="2022-07-26T07:02:54.880Z">
 <meta property="article:author" content="李瀚翾">
-<meta property="article:tag" content="天文摄影">
+<meta property="article:tag" content="React">
+<meta property="article:tag" content="Create-React-App">
+<meta property="article:tag" content="Import Path Alias">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/2022-07-10-plato-and-vallis-alpes.jpeg">
     
     
         
@@ -244,20 +244,20 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title">
-            柏拉图环形山与阿尔卑斯谷
+            在 React CRA 项目中使用 Alias 简化模块导入
         </h1>
     
     
         <div class="post-meta">
-    <time datetime="2022-07-11T05:29:53+00:00">
+    <time datetime="2022-07-26T05:57:46+00:00">
 	
-		    2022年 7月 11日
+		    2022年 7月 26日
     	
     </time>
     
         <span>发布在 </span>
         
-    <a class="category-link" href="/categories/%E5%A4%A9%E6%96%87%E6%91%84%E5%BD%B1/">天文摄影</a>
+    <a class="category-link" href="/categories/React/">React</a>
 
 
     
@@ -270,18 +270,32 @@
     <div class="post-content markdown">
         <div class="main-content-wrap">
             <!-- excerpt -->
-<p><img src="2022-07-10-plato-and-vallis-alpes.jpeg" alt=""></p>
-<p>设备: Explore Scientific 152/1900 mm 马卡 + EXOS-2 Goto 赤道仪<br>相机: ZWO ASI385MC<br>时间: 2022-07-10 晚<br>地点: 南阳台</p>
-<p><br/></p>
-<p>主要地标包括:</p>
-<ol>
-<li>柏拉图环形山</li>
-<li>阿尔卑斯山脉</li>
-<li>阿尔卑斯谷</li>
-<li>卡西尼环形山</li>
-<li>雨海(左下)</li>
-<li>冷海(右上)</li>
-</ol>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Nav <span class="keyword">from</span> <span class="string">&quot;./_partial/Nav&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> PostRepository <span class="keyword">from</span> <span class="string">&quot;../Repository/PostRepository&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>这样看起来似乎没什么问题。</p>
+<p>但是当项目变得复杂后，要么，所有的文件都平铺在一个目录中；要么，就会出现多级嵌套的目录结构，导入模块就可能演变成：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Footer <span class="keyword">from</span> <span class="string">&quot;../../../component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>导入模块变得越来越复杂，而问题似乎又不可避免。</p>
+<p>那么有没有什么方式可以让我们简化导入语句，同时又不影响对依赖模块的查找呢？</p>
+<p>这就是 alias 可以发挥作用的时候了。</p>
+<p><br /></p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>默认情况下，使用 Create-React-App 创建的项目是使用 webpack 进行打包的，在 webpack 的配置中，我们可以设置 <code>alias</code> 项，通过一个简单符号替换公共的路径前缀，比如 <code>~</code>。</p>
+<p>我们需要在项目根目录的 <code>config/webpack.config.js</code> 中修改这个配置项，但是 config 目录默认是不存在的，需要先在项目的根目录下运行，将 webpack 所有的配置项生成到 config 目录中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm run eject</span><br></pre></td></tr></table></figure>
+<p><em>如果项目存在未提交的内容，根据提示，需要先进行 commit，然后才能继续运行此命令.</em></p>
+<blockquote>
+<p>关于 <code>npm run eject</code> 命令，请查看<a target="_blank" rel="noopener" href="https://create-react-app.dev/docs/available-scripts/#npm-run-eject">官方文档</a></p>
+</blockquote>
+<p>执行完成后，就可以在项目的根目录下看到 config 子目录了。</p>
+<p>然后打开 <code>config/webpack.config.js</code> 文件，在变量声明区域追加一行</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> basePath = path.resolve(__dirname, <span class="string">&quot;../src&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p><em>通常 path 模块已经被导入了，不过最好还是再进行一下确认</em></p>
+<p>然后我们在向外暴露的函数中，找到最后 return 的巨大 object 里面的 <code>resolve.alias</code> 一项，向里面添加一组键值对。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">alias: &#123;</span><br><span class="line">    <span class="string">&quot;~&quot;</span>: basePath,  <span class="comment">// 添加这一行</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>修改后，就可以使用 <code>~</code> 作为前缀去导入内部组件了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Footer <span class="keyword">from</span> <span class="string">&quot;~/component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>上述的修改，会让 webpack 在打包时，使用 <code>basePath</code> 的值（我这里使用的是 src 目录的绝对路径）替换 <code>~</code> 符号，然后使用绝对路径去寻找依赖的组件。</p>
+<p>这样就解决了导入路径繁琐的问题。</p>
             
 
 
@@ -292,7 +306,7 @@
             <div class="post-footer-tags">
                 <span class="text-color-light text-small">标签</span><br/>
                 
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/%E5%A4%A9%E6%96%87%E6%91%84%E5%BD%B1/" rel="tag">天文摄影</a>
+    <a class="tag tag--primary tag--small t-none-link" href="/tags/Create-React-App/" rel="tag">Create-React-App</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Import-Path-Alias/" rel="tag">Import Path Alias</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/React/" rel="tag">React</a>
 
             </div>
         
@@ -302,14 +316,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
-                    data-tooltip="土星"
-                    aria-label="上一篇: 土星"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -319,9 +330,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/10/astro-photography/2022-07-08-waxing-gibbous-moon/"
-                    data-tooltip="渐盈凸月(初十)"
-                    aria-label="下一篇: 渐盈凸月(初十)"
+                    href="/2022/07/20/docker/manage-data-in-docker/"
+                    data-tooltip="Docker 中的数据管理(译)"
+                    aria-label="下一篇: Docker 中的数据管理(译)"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -346,7 +357,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -359,7 +370,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -372,7 +383,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -417,14 +428,11 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
-                    data-tooltip="土星"
-                    aria-label="上一篇: 土星"
-                >
-                    
+                    <a
+                        class="post-action-btn btn btn--disabled"
+                        aria-hidden="true"
+                    >
+                        
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -434,9 +442,9 @@
                     
                 <a
                     class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/10/astro-photography/2022-07-08-waxing-gibbous-moon/"
-                    data-tooltip="渐盈凸月(初十)"
-                    aria-label="下一篇: 渐盈凸月(初十)"
+                    href="/2022/07/20/docker/manage-data-in-docker/"
+                    data-tooltip="Docker 中的数据管理(译)"
+                    aria-label="下一篇: Docker 中的数据管理(译)"
                 >
                     
                         <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
@@ -461,7 +469,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Facebook"
                     aria-label="分享到 Facebook"
                 >
@@ -474,7 +482,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Twitter"
                     aria-label="分享到 Twitter"
                 >
@@ -487,7 +495,7 @@
             <li class="post-action hide-xs">
                 <a
                     class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                     title="分享到 Google+"
                     aria-label="分享到 Google+"
                 >
@@ -521,7 +529,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                         aria-label="分享到 Facebook"
                     >
                         <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
@@ -534,7 +542,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                         aria-label="分享到 Twitter"
                     >
                         <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
@@ -547,7 +555,7 @@
                     <a
                         class="share-option-btn"
                         target="new"
-                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/11/astro-photography/plato-and-vallis-alpes/"
+                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"
                         aria-label="分享到 Google+"
                     >
                         <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
