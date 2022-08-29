@@ -11,14 +11,14 @@
     
     
     
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n问题在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：\n12import Nav from &quot;./_partial/Nav&quot;;import PostRepository from &quot;../Repository/PostRepository&quot;;\n这样看起来似乎没什么问题。\n但是当项目变得复杂后，要么，所有的文件都平铺在一个目录中；要么，就会出现多级嵌套的目录结构，导入模块就可能演变成：\n1import Footer from &quot;../../../component/_partial/Footer&quot;;\n导入模块变得越来越复杂，而问题似乎又不可避免。\n那么有没有什么方式可以让我们简化导入语句，同时又不影响对依赖模块的查找呢？\n这就是 alias 可以发挥作用的时候了。\n\n解决方法默认情况下，使用 Create-React-App 创建的项目是使用 webpack 进行打包的，在 webpack 的配置中，我们可以设置 alias 项，通过一个简单符号替换公共的路径前缀，比如 ~。\n我们需要在项目根目录的 config/webpack.config.js 中修改这个配置项，但是 config 目录默认是不存在的，需要先在项目的根目录下运行，将 webpack 所有的配置项生成到 config 目录中。\n1$ npm run eject\n如果项目存在未提交的内容，根据提示，需要先进行 commit，然后才能继续运行此命令.\n\n关于 npm run eject 命令，请查看官方文档\n\n执行完成后，就可以在项目的根目录下看到 config 子目录了。\n然后打开 config/webpack.config.js 文件，在变量声明区域追加一行\n1const basePath = path.resolve(__dirname, &quot;../src&quot;);\n通常 path 模块已经被导入了，不过最好还是再进行一下确认\n然后我们在向外暴露的函数中，找到最后 return 的巨大 object 里面的 resolve.alias 一项，向里面添加一组键值对。\n123456...alias: &#123;    &quot;~&quot;: basePath,  // 添加这一行    ...&#125;...\n修改后，就可以使用 ~ 作为前缀去导入内部组件了。\n1import Footer from &quot;~/component/_partial/Footer&quot;;\n上述的修改，会让 webpack 在打包时，使用 basePath 的值（我这里使用的是 src 目录的绝对路径）替换 ~ 符号，然后使用绝对路径去寻找依赖的组件。\n这样就解决了导入路径繁琐的问题。","dateCreated":"2022-07-26T05:57:46+00:00","dateModified":"2022-07-26T07:02:54+00:00","datePublished":"2022-07-26T05:57:46+00:00","description":"","headline":"在 React CRA 项目中使用 Alias 简化模块导入","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/","keywords":"React, Create-React-App, Import Path Alias"}</script>
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n问题在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：\n12import Nav from &quot;./_partial/Nav&quot;;import PostRepository from &quot;../Repository/PostRepository&quot;;\n这样看起来似乎没什么问题。\n但是当项目变得复杂后，要么，所有的文件都平铺在一个目录中；要么，就会出现多级嵌套的目录结构，导入模块就可能演变成：\n1import Footer from &quot;../../../component/_partial/Footer&quot;;\n导入模块变得越来越复杂，而问题似乎又不可避免。\n那么有没有什么方式可以让我们简化导入语句，同时又不影响对依赖模块的查找呢？\n这就是 alias 可以发挥作用的时候了。\n\n解决方法默认情况下，使用 Create-React-App 创建的项目是使用 webpack 进行打包的，在 webpack 的配置中，我们可以设置 alias 项，通过一个简单符号替换公共的路径前缀，比如 ~。\n我们需要在项目根目录的 config/webpack.config.js 中修改这个配置项，但是 config 目录默认是不存在的，需要先在项目的根目录下运行，将 webpack 所有的配置项生成到 config 目录中。\n1$ npm run eject\n如果项目存在未提交的内容，根据提示，需要先进行 commit，然后才能继续运行此命令.\n\n关于 npm run eject 命令，请查看官方文档\n\n执行完成后，就可以在项目的根目录下看到 config 子目录了。\n然后打开 config/webpack.config.js 文件，在变量声明区域追加一行\n1const basePath = path.resolve(__dirname, &quot;../src&quot;);\n通常 path 模块已经被导入了，不过最好还是再进行一下确认\n然后我们在向外暴露的函数中，找到最后 return 的巨大 object 里面的 resolve.alias 一项，向里面添加一组键值对。\n123456...alias: &#123;    &quot;~&quot;: basePath,  // 添加这一行    ...&#125;...\n修改后，就可以使用 ~ 作为前缀去导入内部组件了。\n1import Footer from &quot;~/component/_partial/Footer&quot;;\n上述的修改，会让 webpack 在打包时，使用 basePath 的值（我这里使用的是 src 目录的绝对路径）替换 ~ 符号，然后使用绝对路径去寻找依赖的组件。\n这样就解决了导入路径繁琐的问题。","dateCreated":"2022-07-26T05:57:46+00:00","dateModified":"2022-08-29T09:05:26+00:00","datePublished":"2022-07-26T05:57:46+00:00","description":"","headline":"在 React CRA 项目中使用 Alias 简化模块导入","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/","keywords":"React, Create-React-App, Import Path Alias"}</script>
     <meta property="og:type" content="blog">
 <meta property="og:title" content="在 React CRA 项目中使用 Alias 简化模块导入">
 <meta property="og:url" content="https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/">
 <meta property="og:site_name" content="技术与生活">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-07-26T05:57:46.000Z">
-<meta property="article:modified_time" content="2022-07-26T07:02:54.880Z">
+<meta property="article:modified_time" content="2022-08-29T09:05:26.842Z">
 <meta property="article:author" content="李瀚翾">
 <meta property="article:tag" content="React">
 <meta property="article:tag" content="Create-React-App">
@@ -269,6 +269,9 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
+            
+
+
             <!-- excerpt -->
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Nav <span class="keyword">from</span> <span class="string">&quot;./_partial/Nav&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> PostRepository <span class="keyword">from</span> <span class="string">&quot;../Repository/PostRepository&quot;</span>;</span><br></pre></td></tr></table></figure>
@@ -296,9 +299,6 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Footer <span class="keyword">from</span> <span class="string">&quot;~/component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
 <p>上述的修改，会让 webpack 在打包时，使用 <code>basePath</code> 的值（我这里使用的是 src 目录的绝对路径）替换 <code>~</code> 符号，然后使用绝对路径去寻找依赖的组件。</p>
 <p>这样就解决了导入路径繁琐的问题。</p>
-            
-
-
         </div>
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">
@@ -316,11 +316,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2022/08/29/astro-photography/2022-08-27-the-milky-way-at-a-glance/"
+                    data-tooltip="银河的浅影"
+                    aria-label="上一篇: 银河的浅影"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>
@@ -428,11 +431,14 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
+                    
+                <a
+                    class="post-action-btn btn btn--default tooltip--top"
+                    href="/2022/08/29/astro-photography/2022-08-27-the-milky-way-at-a-glance/"
+                    data-tooltip="银河的浅影"
+                    aria-label="上一篇: 银河的浅影"
+                >
+                    
                         <i class="fa fa-angle-left" aria-hidden="true"></i>
                         <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
                     </a>

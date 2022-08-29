@@ -274,6 +274,9 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
+            
+
+
             <!-- excerpt -->
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在看《Concurrency in Go》的时候，突然开始思考垃圾回收的问题。想起之前在学习Python的时候，对垃圾回收机制也只是简单了解，网上博客的说法也不是很统一，所以这次决定系统地了解一下。查了网上的一些资料，最后追踪到《编译原理》（龙书）第7章，在这里稍微做一下整体的总结，不针对具体的编程语言。内容可能偏向表面概念，具体算法实现如果日后有精力深究，再去详细分析，这只是先从概念上入门理解。</p>
 <h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><h3 id="garbage（垃圾）"><a href="#garbage（垃圾）" class="headerlink" title="garbage（垃圾）"></a>garbage（垃圾）</h3><p><strong>不能被引用到数据通常被称为“垃圾(garbage)”</strong>。“能否被引用到”主要通过“可达性(reachability)”这一概念来进行描述。显然，只有两种状态可以用来描述一个对象：可达(reachable)或不可达(unreachable)。同时，一个对象被创建，状态由可达转变为不可达，一定是由用户程序操作的结果，这个用户程序，在垃圾回收这个论题中，通常被称为“增变者(mutator)”。当某些对象对于增变者来说不可达的时候，它们就转变为了垃圾。</p>
@@ -419,9 +422,6 @@
 <p>这些内容在编译原理中并没有详细具体的介绍，在这里先列出来，如果有需要，再查找相关资料进行具体总结。</p>
 <p>以上。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>编译原理(第二版) [7.5～7.7]<br>Compilers - Principles, Techniques, &amp;Tools(Second Edition) [7.5～7.7]<br><a target="_blank" rel="noopener" href="http://oohcode.com/2017/02/03/gc-advanced/">垃圾回收进阶算法</a><br><a target="_blank" rel="noopener" href="https://andrewpqc.github.io/2018/10/08/python-memory-management/">聊聊Python的内存管理</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/news/78317">Python和Ruby 的分代垃圾回收机制</a>  </p>
-            
-
-
         </div>
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">

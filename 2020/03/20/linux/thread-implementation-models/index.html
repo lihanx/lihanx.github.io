@@ -267,6 +267,9 @@
     
     <div class="post-content markdown">
         <div class="main-content-wrap">
+            
+
+
             <!-- excerpt -->
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在之前，我总结了一篇<a href="/2019/02/13/user-level-threads-and-kernel-level-threads/">用户级线程 与 内核级线程</a>的问答，描述了<strong>用户级线程</strong>和<strong>内核级线程</strong>各自的特性。这也使我一度认为，Python中常常被人诟病的多线程无法同时被多核分配的原因，是因为它使用了用户级线程。然而最近，在我重新审视一些多线程的问题时，我突然发现，我的理解存在很大偏差。于是我重新查阅了一些资料，在这里重新进行梳理。</p>
 <h2 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h2><h3 id="POSIX-Threads"><a href="#POSIX-Threads" class="headerlink" title="POSIX Threads"></a>POSIX Threads</h3><p>为了保证多线程编程的可移植性，IEEE定义了一套标准的线程接口规范，这就是POSIX线程规范。跟据这个规范实现的线程库，通常被称作Pthread。POSIX Threads只是接口规范的定义，具体的实现取决于不同的操作系统。</p>
@@ -289,9 +292,6 @@
 <li><a target="_blank" rel="noopener" href="http://man7.org/linux/man-pages/man7/pthreads.7.html">Linux Man Pages - pthread</a></li>
 <li>现代操作系统</li>
 </ol>
-            
-
-
         </div>
     </div>
     <div id="post-footer" class="post-footer main-content-wrap">
