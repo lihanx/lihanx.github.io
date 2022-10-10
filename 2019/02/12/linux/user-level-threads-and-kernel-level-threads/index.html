@@ -1,21 +1,17 @@
-
 <!DOCTYPE html>
-<html lang="zh-cn">
-    
+<html lang=zh>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="技术与生活">
-    <title>用户级线程 与 内核级线程 - 技术与生活</title>
-    <meta name="author" content="李瀚翾">
-    
-    
-    
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n\n原文: user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018\n\n前言原文由作者Alex Onsman于2018-10-10发表在Tutorialspoint上，是对一个题为User-level threads and Kernel-level threads的问题的回答。\n原文翻译线程(Thread)是一个可以被调度者独立管理的轻量级进程。它可以通过并行(Parallelism)的方式来提升应用(Application)的性能。\n一个线程像数据段(Data Segment)、代码段文件(Code Segment Files)一样，和与其同级的线程共享信息，然而它拥有自己的寄存器(Registers)、栈(Stack)和计数器(Counter)等等。\n线程的两个主要类别可以分为：用户级线程 和 内核级线程。如下图所示：\n\n用户级线程(User-Level Threads)用户级线程是由用户实现的，系统内核(Kernel)无法意识到它们的存在。对于系统内核来说，用户级线程就像一个单线程的进程一样。用户级线程比内核级线程更轻量(small)并且更快速(faster)，它由程序计数器(Program Counter, PC)、栈(Stack)、寄存器(Registers)和一个小的进程控制块(A Small Process Control Block)表示。并且，用户级线程间的同步(Synchronization)不会牵涉到内核。\n用户级线程的优点：\n用户级线程的创建比内核级线程更加容易和快速，并且更易于管理；\n用户级线程可以在任何操作系统上运行；\n用户级线程间的切换不会涉及到内核态的权限；\n\n用户级线程的缺点：\n用户级线程实现的多线程应用无法利用处理器的多个核心；\n如果一个用户级线程被阻塞住，那么整个进程就将会阻塞住；\n\n内核级线程(Kernel-Level Threads)内核级线程直接由内核进行使用和管理。整个进程以及其中线程的上下文信息也由内核进行管理。因此，内核级线程相比之下要慢于用户级线程。\n内核级线程的优点：\n同一个进程的多个内核级线程可以被不同的处理器核心调度；\n内核例程(Kernel Routines)同样可以是多线程的；\n如果一个内核级线程产生了阻塞，同一个进程中的其他线程仍然可以被内核调度；\n\n内核级线程的缺点：\n进程中的线程切换需要切换到内核态；\n内核级线程的创建和管理相较于用户级线程更慢；\n\n原文A thread is a lightweight process that can be managed independently by a scheduler. It improves the application performance using parallelism.\nA thread shares information like data segment, code segment files etc. with its peer threads while it contains its own registers, stack, counter etc.\nThe two main types of threads are user-level threads and kernel-level threads. A diagram that demonstrates these is as follows:\n\nUser - Level ThreadsThe user-level threads are implemented by users and the kernel is not aware of the existence of these threads. It handles them as if they were single-threaded processes. User-level threads are small and much faster than kernel level threads. They are represented by a program counter(PC), stack, registers and a small process control block. Also, there is no kernel involvement in synchronization for user-level threads.\nAdvantages of User-Level ThreadsSome of the advantages of user-level threads are as follows:\n\nUser-level threads are easier and faster to create than kernel-level threads. They can also be more easily managed.\nUser-level threads can be run on any operating system.\nThere are no kernel mode privileges required for thread switching in user-level threads.  \n\nDisadvantages of User-Level ThreadsSome of the disadvantages of user-level threads are as follows:\n\nMultithreaded applications in user-level threads cannot use multiprocessing to their advantage.\nThe entire process is blocked if one user-level thread performs blocking operation.  \n\nKernel-Level ThreadsKernel-level threads are handled by the operating system directly and the thread management is done by the kernel. The context information for the process as well as the process threads is all managed by the kernel. Because of this, kernel-level threads are slower than user-level threads.\nAdvantages of Kernel-Level ThreadsSome of the advantages of kernel-level threads are as follows:\n\nMultiple threads of the same process can be scheduled on different processors in kernel-level threads.\nThe kernel routines can also be multithreaded.\nIf a kernel-level thread is blocked, another thread of the same process can be scheduled by the kernel.  \n\nDisadvantages of Kernel-Level ThreadsSome of the disadvantages of kernel-level threads are as follows:\n\nA mode switch to kernel mode is required to transfer control from one thread to another in a process.\nKernel-level threads are slower to create as well as manage as compared to user-level threads.\n","dateCreated":"2019-02-12T16:00:00+00:00","dateModified":"2020-12-08T15:08:54+00:00","datePublished":"2019-02-12T16:00:00+00:00","description":"","headline":"用户级线程 与 内核级线程","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/","keywords":"Linux"}</script>
-    <meta property="og:type" content="blog">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="原文: user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018  前言原文由作者Alex Onsman于2018-10-10发表在Tutorialspoint上，是对一个题为User-level threads and Kernel-level threads的问题的回答。 原文翻译线程(Threa">
+<meta property="og:type" content="article">
 <meta property="og:title" content="用户级线程 与 内核级线程">
 <meta property="og:url" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/">
 <meta property="og:site_name" content="技术与生活">
+<meta property="og:description" content="原文: user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018  前言原文由作者Alex Onsman于2018-10-10发表在Tutorialspoint上，是对一个题为User-level threads and Kernel-level threads的问题的回答。 原文翻译线程(Threa">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/1.PNG">
 <meta property="og:image" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/1.PNG">
@@ -27,253 +23,140 @@
 <meta name="twitter:image" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/1.PNG">
     
     
+      
         
-    
-    
-        <meta property="og:image" content="https://lihanx.github.io/assets/images/profile.jpg"/>
-    
-    
-    
-    
-    <!--STYLES-->
-    
-<link rel="stylesheet" href="/assets/css/style-xauyfozqtqozcpsrphukridnjkr9dhe8pwadzdb0xqjt4tr2luvsk6bxwf84.min.css">
-
-    <!--STYLES END-->
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZF6GHC927L"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-ZF6GHC927L');
-    </script>
-
-
-    
-
-    
+          <link rel="shortcut icon" href="/images/favicon.ico">
         
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
     
-</head>
+    <!-- title -->
+    <title>用户级线程 与 内核级线程</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-    <body>
-        <div id="blog">
-            <!-- Define author's picture -->
-
-
+    <!-- persian styles -->
     
-        
-            
-        
-    
-
-<header id="header" data-behavior="5">
-    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
-    <div class="header-title">
-        <a
-            class="header-title-link"
-            href="/"
-            aria-label=""
-        >
-            技术与生活
-        </a>
-    </div>
-    
-        
-            <a
-                class="header-right-picture "
-                href="#about"
-                aria-label="打开链接: /#about"
-            >
-        
-        
-            <img class="header-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-        </a>
-    
-</header>
-
-            <!-- Define author's picture -->
-
-
-
-        
-    
-
-<nav id="sidebar" data-behavior="5">
-    <div class="sidebar-container">
-        
-            <div class="sidebar-profile">
-                <a
-                    href="/#about"
-                    aria-label="阅读有关作者的更多信息"
-                >
-                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-                </a>
-                <h4 class="sidebar-profile-name">李瀚翾</h4>
-                
-                    <h5 class="sidebar-profile-bio"><p>持续学习, 不断探索</p>
-</h5>
-                
-            </div>
-        
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/"
-                            
-                            rel="noopener"
-                            title="首页"
-                        >
-                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">首页</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-categories"
-                            
-                            rel="noopener"
-                            title="分类"
-                        >
-                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">分类</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-tags"
-                            
-                            rel="noopener"
-                            title="标签"
-                        >
-                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">标签</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-archives"
-                            
-                            rel="noopener"
-                            title="归档"
-                        >
-                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">归档</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="#about"
-                            
-                            rel="noopener"
-                            title="关于"
-                        >
-                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">关于</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="https://github.com/lihanx"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="GitHub"
-                        >
-                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">GitHub</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="mailto:lihanx9@163.com"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="邮箱"
-                        >
-                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">邮箱</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-    </div>
-</nav>
-
-            
-            <div id="main" data-behavior="5"
-                 class="
-                        hasCoverMetaIn
-                        ">
-                
-<article class="post">
+    <!-- rss -->
     
     
-        <div class="post-header main-content-wrap text-left">
-    
-        <h1 class="post-title">
-            用户级线程 与 内核级线程
-        </h1>
-    
-    
-        <div class="post-meta">
-    <time datetime="2019-02-12T16:00:00+00:00">
+	<!-- mathjax -->
 	
-		    2019年 2月 12日
-    	
-    </time>
-    
-        <span>发布在 </span>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
         
-    <a class="category-link" href="/categories/Linux/">Linux</a>
+        <li><a class="icon" aria-label="Previous post" href="/2019/07/05/python/asyncio-vs-gevent/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&text=用户级线程 与 内核级线程"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&is_video=false&description=用户级线程 与 内核级线程"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&name=用户级线程 与 内核级线程&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&t=用户级线程 与 内核级线程"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-
-    
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
 </div>
 
     
-</div>
-
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
     
-    <div class="post-content markdown">
-        <div class="main-content-wrap">
-            
+    <h1 class="posttitle" itemprop="name headline">
+        用户级线程 与 内核级线程
+    </h1>
 
 
-            <!-- excerpt -->
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">李瀚翾</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-02-12T16:00:00.000Z" itemprop="datePublished">2019-02-13</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Linux/">Linux</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Linux/" rel="tag">Linux</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <a id="more"></a>
+<!-- excerpt -->
 <blockquote>
 <p>原文: <a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/user-level-threads-and-kernel-level-threads">user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018</a></p>
 </blockquote>
@@ -330,323 +213,145 @@
 <li>A mode switch to kernel mode is required to transfer control from one thread to another in a process.</li>
 <li>Kernel-level threads are slower to create as well as manage as compared to user-level threads.</li>
 </ol>
-        </div>
-    </div>
-    <div id="post-footer" class="post-footer main-content-wrap">
-        
-            <div class="post-footer-tags">
-                <span class="text-color-light text-small">标签</span><br/>
-                
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/Linux/" rel="tag">Linux</a>
 
-            </div>
-        
-        
-            <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/07/05/python/asyncio-vs-gevent/"
-                    data-tooltip="asyncio vs gevent"
-                    aria-label="上一篇: asyncio vs gevent"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-        
-        
-            
-        
-    </div>
+  </div>
 </article>
 
 
 
-                <footer id="footer" class="main-content-wrap">
-    <span class="copyrights">
-        Copyrights &copy; 2022 李瀚翾. All Rights Reserved.
-    </span>
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Category</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&text=用户级线程 与 内核级线程"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&is_video=false&description=用户级线程 与 内核级线程"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&name=用户级线程 与 内核级线程&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&t=用户级线程 与 内核级线程"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2022
+    李瀚翾
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
 </footer>
 
-            </div>
-            
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
-                    <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/07/05/python/asyncio-vs-gevent/"
-                    data-tooltip="asyncio vs gevent"
-                    aria-label="上一篇: asyncio vs gevent"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    <a
-                        class="post-action-btn btn btn--disabled"
-                        aria-hidden="true"
-                    >
-                        
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-                </div>
-                
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
-        <i id="btn-close-shareoptions" class="fa fa-times"></i>
-        <ul class="share-options">
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                        aria-label="分享到 Facebook"
-                    >
-                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                        aria-label="分享到 Twitter"
-                    >
-                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://plus.google.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                        aria-label="分享到 Google+"
-                    >
-                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
-                    </a>
-                </li>
-            
-        </ul>
     </div>
+    <!-- styles -->
 
 
-            
-        </div>
-        
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
 
 
-    
-        
-    
-
-<div id="about">
-    <div id="about-card">
-        <div id="about-btn-close">
-            <i class="fa fa-times"></i>
-        </div>
-        
-            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-            <h4 id="about-card-name">李瀚翾</h4>
-        
-            <div id="about-card-bio"><p>持续学习, 不断探索</p>
-</div>
-        
-        
-            <div id="about-card-job">
-                <i class="fa fa-briefcase"></i>
-                <br/>
-                <p>Python 开发工程师</p>
-
-            </div>
-        
-        
-    </div>
-</div>
-
-        
-        
-<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
-        <!--SCRIPTS-->
-
-<script src="/assets/js/script-pwcx44shgfco2srkcnhh8knfc88726ymos4auiuwmqt6fcetpnkbnhqtt4ce.min.js"></script>
-
-<!--SCRIPTS END-->
-
-
-    
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
 
 
 
 
-    <script type="text/x-mathjax-config">
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
             inlineMath: [ ["$","$"], ["\\(","\\)"] ],

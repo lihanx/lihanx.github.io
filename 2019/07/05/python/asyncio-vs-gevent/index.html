@@ -1,21 +1,17 @@
-
 <!DOCTYPE html>
-<html lang="zh-cn">
-    
+<html lang=zh>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="技术与生活">
-    <title>asyncio vs gevent - 技术与生活</title>
-    <meta name="author" content="李瀚翾">
-    
-    
-    
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n前言本文列举了一些简单场景下的协程应用，主要目的是通过对比asyncio和gevent的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。\n环境及版本\nPython 3.7\n\n一、创建简单协程并发任务123456789101112131415161718#  使用asyncio完成简单协程并发任务import asyncioimport aiohttpasync def download(url):    async with aiohttp.ClientSession() as session:        async with session.get(url) as response:            content = await response.read()            return contenttasks = list()url_list = [&quot;http://www.xxx.com&quot;]*10loop = asyncio.get_event_loop()for url in url_list:    task = loop.create_task(download(url))    tasks.append(task)result = loop.run_until_complete(asyncio.gather(*tasks))loop.close()\n12345678910111213141516171819# 使用gevent完成简单协程并发任务import geventfrom gevent import monkeymonkey.patch_all()import requestsdef download(url):    with requests.session() as session:        response = session.get(url)        return response.contenttasks = list()url_list = list()for url in url_list:    # 创建greenlet    greenlet_coro = gevent.spawn(download, url)    tasks.append(greenlet_coro)# 阻塞等待全部任务完成gevent.joinall(tasks)\n对比来看，在原生协程中，await语句声明了一个可以挂起当前协程的断点，异步等待一个awaitable对象，同时切换到其他可执行的协程，配合I/O多路复用实现了单线程的并发效果；而Gevent则是通过Monkey Patch，修改了socket的行为，将其转变为非阻塞模式，当然同样是以I/O多路复用为基础。对比来看，这两段简单代码的逻辑也是非常相似，只不过asyncio需要显式声明事件循环，而Gevent并不需要。当然还有一点需要注意的是，monkey.patch_all()打上猴子补丁的位置是有讲究的，官方文档明确提到的，打补丁要在尽量靠前的位置，同时也要考虑并发编程时在什么位置更合适，不过实际的gevent实现的协程，代码的执行逻辑并不直观，还需要进行实际的测试才能更好的理解。\n二、Greenlet和Task方法对比class &#39;Task&#39;\n\n\n\nmethod\n描述\n\n\n\n\ncancel()\n取消协程,抛出CancelledError异常\n\n\ncancelled()\ntask是否被取消\n\n\ndone()\ntask是否已完成\n\n\nresult()\n返回协程中return的对象\n\n\nexception()\n返回task抛出的异常\n\n\nadd_done_callback(callback, *, context=None)\n为task添加回调函数\n\n\nremove_done_callback(callback)\n移除task的回调函数\n\n\n\n\n这里推荐使用Python 3.7版本的asyncio并且阅读对应的官方标准库文档，3.7的文档重新整理了接口分类，指明了哪些是high level api，哪些是low level API，为使用提供了一些实际的指导。同时也修复了一些在3.6版本中显而易见的bug。\nclass &#39;Greenlet&#39;\n\n\n\nmethod\n描述\n\n\n\n\nready()\ngreenlet是否执行完成\n\n\nsuccessful()\ngreenlet是否执行完成且没有抛出异常\n\n\nstart()\n立即调度greenlet\n\n\nstart_later(seconds)\n延时调度greenlet\n\n\njoin(timeout=None)\n等待greenlet结束或超时\n\n\nkill(exception=GreenletExit, block=True, timeout=None)\n在greenlet中抛出异常\n\n\nlink(callback)\n添加一个greenlet生命周期结束时的回调函数\n\n\nlink_value(callback)\n添加一个greenlet完成，并正常返回时回调函数\n\n\nlink_exception(callback)\n添加一个greenlet完成，并抛出异常的回调函数\n\n\nrawlink(callback)\n添加一个greenlet执行完成时的回调函数\n\n\nunlink(callback)\n移除link()或rawlink()添加的回调函数\n\n\n\n\n二、gevent和asyncio协程调度函数对比asyncio\n\n\n\nfunction\n描述\n\n\n\n\nrun(coro, *, debug=False)\n直接运行一个协程\n\n\ncreate_task(coro)\n创建一个Task实例，用于调度协程函数\n\n\nsleep(delay, result=None, *, loop=None)\nsleep\n\n\ngather(*aws, loop=None, return_exceptions=False)\n按照顺序并发调度多个awaitable对象，返回一个awaitable object\n\n\nwait(aws, *, loop=None, timeout=None, return_when=ALL_COMPLETED)\n并发调度awaitables,阻塞至满足return_when的条件，返回一个coroutine\n\n\nwait_for(aw, timeout, *, loop=None)\n等待一个awaitable完成或超时\n\n\nas_completed(aws, *, loop=None, timeout=None)\n并发执行awaitable objects，返回包含Future的迭代器\n\n\nrun_coroutine_threadsafe(coro, loop)\n保证线程安全地执行一个协程\n\n\ncurrent_task(loop=None)\n获得当前正在运行的task\n\n\nall_tasks(loop=None)\n获得事件循环中所有未完成的task\n\n\n\n\n由于asyncio需要显式声明事件循环，并把一部分功能交给了事件循环来做，所以这里把loop的一些涉及到协程调度的方法也列出来：\n\n\n\n\nmethod\n描述\n\n\n\n\nrun_until_complete(future)\n调度执行futurn，阻塞等待至其运行完成\n\n\ncall_soon(callback, *args, context=None)\n在事件循环的下一轮中调度callback\n\n\ncall_later(delay, callback, *args, context=None)\n延迟调度callback\n\n\ncreate_task(coro)\n创建一个Task实例，用于调度协程函数\n\n\n\n\ngevent\n\n\n\nfuntion\n描述\n\n\n\n\nspawn(function, *args, **kwargs)\n创建一个greenlet对象，并调度它执行function\n\n\nspawn_later(seconds, function, *args, **kwargs)\n创建一个greenlet对象并延迟调度\n\n\nspawn_raw(function, *args, **kwargs)\n和spawn相似，详见文档描述\n\n\ngetcurrent()\n获取当前正在执行的greenlet\n\n\nkill(greenlet, exception=GreenletExit)\n异步终止greenlet\n\n\nkillall(greenlets, exception=GreenletExit, block=True, timeout=None)\n通过使greenlet抛出异常来强制终止所有greenlet\n\n\nsleep(seconds=0, ref=True)\nsleep\n\n\nwait(objects=None, timeout=None, count=None)\n等待一个object处于ready状态或事件循环结束\n\n\niwait(objects, timeout=None, count=None)\n等待所有object就绪或到达超时事件，返回一个迭代器\n\n\njoinall(greenlets, timeout=None, raise_error=False, count=None)\n等待所有greenlet完成\n\n\n\n\n可以看到，整体来说，gevent和asyncio的api设计非常相似，同样的功能用它们两个都可以实现，只不过是代码风格上会有些差异。","dateCreated":"2019-07-05T16:00:00+00:00","dateModified":"2022-07-26T06:40:41+00:00","datePublished":"2019-07-05T16:00:00+00:00","description":"","headline":"asyncio vs gevent","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/","keywords":"Asyncio, Python, Gevent"}</script>
-    <meta property="og:type" content="blog">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="前言本文列举了一些简单场景下的协程应用，主要目的是通过对比asyncio和gevent的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。 环境及版本 Python 3.7  一、创建简单协程并发任务123456789101112131415161718#  使用asyncio完成简单协程并发任务import asyncioimport aiohttpasync def">
+<meta property="og:type" content="article">
 <meta property="og:title" content="asyncio vs gevent">
 <meta property="og:url" content="https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/">
 <meta property="og:site_name" content="技术与生活">
+<meta property="og:description" content="前言本文列举了一些简单场景下的协程应用，主要目的是通过对比asyncio和gevent的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。 环境及版本 Python 3.7  一、创建简单协程并发任务123456789101112131415161718#  使用asyncio完成简单协程并发任务import asyncioimport aiohttpasync def">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-07-05T16:00:00.000Z">
 <meta property="article:modified_time" content="2022-07-26T06:40:41.442Z">
@@ -26,253 +22,142 @@
 <meta name="twitter:card" content="summary">
     
     
+      
         
-    
-    
-        <meta property="og:image" content="https://lihanx.github.io/assets/images/profile.jpg"/>
-    
-    
-    
-    
-    <!--STYLES-->
-    
-<link rel="stylesheet" href="/assets/css/style-xauyfozqtqozcpsrphukridnjkr9dhe8pwadzdb0xqjt4tr2luvsk6bxwf84.min.css">
-
-    <!--STYLES END-->
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZF6GHC927L"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-ZF6GHC927L');
-    </script>
-
-
-    
-
-    
+          <link rel="shortcut icon" href="/images/favicon.ico">
         
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
     
-</head>
+    <!-- title -->
+    <title>asyncio vs gevent</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-    <body>
-        <div id="blog">
-            <!-- Define author's picture -->
-
-
+    <!-- persian styles -->
     
-        
-            
-        
-    
-
-<header id="header" data-behavior="5">
-    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
-    <div class="header-title">
-        <a
-            class="header-title-link"
-            href="/"
-            aria-label=""
-        >
-            技术与生活
-        </a>
-    </div>
-    
-        
-            <a
-                class="header-right-picture "
-                href="#about"
-                aria-label="打开链接: /#about"
-            >
-        
-        
-            <img class="header-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-        </a>
-    
-</header>
-
-            <!-- Define author's picture -->
-
-
-
-        
-    
-
-<nav id="sidebar" data-behavior="5">
-    <div class="sidebar-container">
-        
-            <div class="sidebar-profile">
-                <a
-                    href="/#about"
-                    aria-label="阅读有关作者的更多信息"
-                >
-                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-                </a>
-                <h4 class="sidebar-profile-name">李瀚翾</h4>
-                
-                    <h5 class="sidebar-profile-bio"><p>持续学习, 不断探索</p>
-</h5>
-                
-            </div>
-        
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/"
-                            
-                            rel="noopener"
-                            title="首页"
-                        >
-                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">首页</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-categories"
-                            
-                            rel="noopener"
-                            title="分类"
-                        >
-                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">分类</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-tags"
-                            
-                            rel="noopener"
-                            title="标签"
-                        >
-                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">标签</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-archives"
-                            
-                            rel="noopener"
-                            title="归档"
-                        >
-                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">归档</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="#about"
-                            
-                            rel="noopener"
-                            title="关于"
-                        >
-                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">关于</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="https://github.com/lihanx"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="GitHub"
-                        >
-                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">GitHub</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="mailto:lihanx9@163.com"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="邮箱"
-                        >
-                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">邮箱</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-    </div>
-</nav>
-
-            
-            <div id="main" data-behavior="5"
-                 class="
-                        hasCoverMetaIn
-                        ">
-                
-<article class="post">
+    <!-- rss -->
     
     
-        <div class="post-header main-content-wrap text-left">
-    
-        <h1 class="post-title">
-            asyncio vs gevent
-        </h1>
-    
-    
-        <div class="post-meta">
-    <time datetime="2019-07-05T16:00:00+00:00">
+	<!-- mathjax -->
 	
-		    2019年 7月 05日
-    	
-    </time>
-    
-        <span>发布在 </span>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
         
-    <a class="category-link" href="/categories/Python/">Python</a>
+        <li><a class="icon" aria-label="Previous post" href="/2019/09/21/the-garbage-collection-mechanism/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&text=asyncio vs gevent"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&is_video=false&description=asyncio vs gevent"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=asyncio vs gevent&body=Check out this article: https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&name=asyncio vs gevent&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&t=asyncio vs gevent"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-
-    
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%8A%E7%89%88%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">环境及版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E7%AE%80%E5%8D%95%E5%8D%8F%E7%A8%8B%E5%B9%B6%E5%8F%91%E4%BB%BB%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">一、创建简单协程并发任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Greenlet%E5%92%8CTask%E6%96%B9%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="toc-number">4.</span> <span class="toc-text">二、Greenlet和Task方法对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#class-39-Task-39"><span class="toc-number">4.1.</span> <span class="toc-text">class &#39;Task&#39;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#class-39-Greenlet-39"><span class="toc-number">4.2.</span> <span class="toc-text">class &#39;Greenlet&#39;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81gevent%E5%92%8Casyncio%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%87%BD%E6%95%B0%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">二、gevent和asyncio协程调度函数对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#asyncio"><span class="toc-number">5.1.</span> <span class="toc-text">asyncio</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gevent"><span class="toc-number">5.2.</span> <span class="toc-text">gevent</span></a></li></ol></li></ol>
+    </div>
+  </span>
 </div>
 
     
-</div>
-
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
     
-    <div class="post-content markdown">
-        <div class="main-content-wrap">
-            
+    <h1 class="posttitle" itemprop="name headline">
+        asyncio vs gevent
+    </h1>
 
 
-            <!-- excerpt -->
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">李瀚翾</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-07-05T16:00:00.000Z" itemprop="datePublished">2019-07-06</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Python/">Python</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Asyncio/" rel="tag">Asyncio</a>, <a class="tag-link-link" href="/tags/Gevent/" rel="tag">Gevent</a>, <a class="tag-link-link" href="/tags/Python/" rel="tag">Python</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <a id="more"></a>
+<!-- excerpt -->
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文列举了一些简单场景下的协程应用，主要目的是通过对比<code>asyncio</code>和<code>gevent</code>的API设计，加深对协程的理解，同时了解这两种协程实现在用法上的特点和差异。</p>
 <h2 id="环境及版本"><a href="#环境及版本" class="headerlink" title="环境及版本"></a>环境及版本</h2><ul>
 <li>Python 3.7</li>
@@ -511,329 +396,145 @@
 </table>
 </div>
 <p>可以看到，整体来说，gevent和asyncio的api设计非常相似，同样的功能用它们两个都可以实现，只不过是代码风格上会有些差异。</p>
-        </div>
-    </div>
-    <div id="post-footer" class="post-footer main-content-wrap">
-        
-            <div class="post-footer-tags">
-                <span class="text-color-light text-small">标签</span><br/>
-                
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/Asyncio/" rel="tag">Asyncio</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Gevent/" rel="tag">Gevent</a> <a class="tag tag--primary tag--small t-none-link" href="/tags/Python/" rel="tag">Python</a>
 
-            </div>
-        
-        
-            <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/09/21/the-garbage-collection-mechanism/"
-                    data-tooltip="垃圾回收(Garbage Collection)入门"
-                    aria-label="上一篇: 垃圾回收(Garbage Collection)入门"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    data-tooltip="用户级线程 与 内核级线程"
-                    aria-label="下一篇: 用户级线程 与 内核级线程"
-                >
-                    
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-        
-        
-            
-        
-    </div>
+  </div>
 </article>
 
 
 
-                <footer id="footer" class="main-content-wrap">
-    <span class="copyrights">
-        Copyrights &copy; 2022 李瀚翾. All Rights Reserved.
-    </span>
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Category</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%8A%E7%89%88%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">环境及版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%88%9B%E5%BB%BA%E7%AE%80%E5%8D%95%E5%8D%8F%E7%A8%8B%E5%B9%B6%E5%8F%91%E4%BB%BB%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">一、创建简单协程并发任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Greenlet%E5%92%8CTask%E6%96%B9%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="toc-number">4.</span> <span class="toc-text">二、Greenlet和Task方法对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#class-39-Task-39"><span class="toc-number">4.1.</span> <span class="toc-text">class &#39;Task&#39;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#class-39-Greenlet-39"><span class="toc-number">4.2.</span> <span class="toc-text">class &#39;Greenlet&#39;</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81gevent%E5%92%8Casyncio%E5%8D%8F%E7%A8%8B%E8%B0%83%E5%BA%A6%E5%87%BD%E6%95%B0%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">二、gevent和asyncio协程调度函数对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#asyncio"><span class="toc-number">5.1.</span> <span class="toc-text">asyncio</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#gevent"><span class="toc-number">5.2.</span> <span class="toc-text">gevent</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&text=asyncio vs gevent"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&is_video=false&description=asyncio vs gevent"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=asyncio vs gevent&body=Check out this article: https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&title=asyncio vs gevent"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&name=asyncio vs gevent&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/&t=asyncio vs gevent"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2022
+    李瀚翾
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
 </footer>
 
-            </div>
-            
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
-                    <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/09/21/the-garbage-collection-mechanism/"
-                    data-tooltip="垃圾回收(Garbage Collection)入门"
-                    aria-label="上一篇: 垃圾回收(Garbage Collection)入门"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"
-                    data-tooltip="用户级线程 与 内核级线程"
-                    aria-label="下一篇: 用户级线程 与 内核级线程"
-                >
-                    
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-                </div>
-                
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
-        <i id="btn-close-shareoptions" class="fa fa-times"></i>
-        <ul class="share-options">
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                        aria-label="分享到 Facebook"
-                    >
-                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                        aria-label="分享到 Twitter"
-                    >
-                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://plus.google.com/share?url=https://lihanx.github.io/2019/07/05/python/asyncio-vs-gevent/"
-                        aria-label="分享到 Google+"
-                    >
-                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
-                    </a>
-                </li>
-            
-        </ul>
     </div>
+    <!-- styles -->
 
 
-            
-        </div>
-        
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
 
 
-    
-        
-    
-
-<div id="about">
-    <div id="about-card">
-        <div id="about-btn-close">
-            <i class="fa fa-times"></i>
-        </div>
-        
-            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-            <h4 id="about-card-name">李瀚翾</h4>
-        
-            <div id="about-card-bio"><p>持续学习, 不断探索</p>
-</div>
-        
-        
-            <div id="about-card-job">
-                <i class="fa fa-briefcase"></i>
-                <br/>
-                <p>Python 开发工程师</p>
-
-            </div>
-        
-        
-    </div>
-</div>
-
-        
-        
-<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
-        <!--SCRIPTS-->
-
-<script src="/assets/js/script-pwcx44shgfco2srkcnhh8knfc88726ymos4auiuwmqt6fcetpnkbnhqtt4ce.min.js"></script>
-
-<!--SCRIPTS END-->
-
-
-    
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
 
 
 
 
-    <script type="text/x-mathjax-config">
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
             inlineMath: [ ["$","$"], ["\\(","\\)"] ],

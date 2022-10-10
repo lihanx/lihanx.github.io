@@ -1,21 +1,17 @@
-
 <!DOCTYPE html>
-<html lang="zh-cn">
-    
+<html lang=zh>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="generator" content="技术与生活">
-    <title>在 Mac OS 上创建 Android 虚拟设备 - 技术与生活</title>
-    <meta name="author" content="李瀚翾">
-    
-    
-    
-    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg"},"articleBody":"\n前言当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器.\n使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要好, 不需要 Arm Translator 一类的东西, 性能也还不错, 虽然有些诡异的应用还是不能正常运行, 但是也能临时应付一下没有实体设备的场景.\n下面就具体介绍一下安装方式.\n\n安装 SDK使用 home-brew 安装 jdk 和 android-sdk\n12$ brew install openjdk@8$ brew install android-sdk\n\n设置环境变量将项目启动依赖的环境变量设置一下, 然后还需要将 emulator 所在的目录添加到环境变量 PATH 中\n1234$ export ANDROID_SDK_ROOT=/usr/local/share/android-sdk/$ export JAVA_HOME=/usr/local/Cellar/openjdk@8/1.8.0+322/$ export ANDROID_AVD_HOME=$HOME/.android/avd$ export PATH=$ANDROID_SDK_ROOT/emulator:$PATH\n这里 openjdk@8 子目录的名称需要手动确认, 版本号可能随着时间的推移发生变更\n\n安装 Android SDK 组件在下载安装 Android 系统之前, 还需要安装必要的组件\n1$ sdkmanager &quot;platform-tools&quot;\n我们可以再查看一下可选用的系统版本列表\n1$ sdkmanager --list | grep system-images\n\n选择并安装 Android 系统选择好系统之后, 我们可以选择安装指定版本的 Android API 和系统镜像\n12$ sdkmanager &quot;platforms;android-30&quot;$ sdkmanager --install &quot;system-images;android-30;google_apis;x86_64&quot;\n\n创建虚拟设备完成上述所有准备工作后, 就可以开始创建一台 Android 虚拟设备了\n1$ echo &quot;no&quot; | avdmanager --verbose create avd --force --name &quot;android11&quot; --package &quot;system-images;android-30;google_apis;x86_64&quot; --tag &quot;google_apis&quot; --abi &quot;x86_64&quot;\n\n提前配置启动参数如果直接启动的话, 还需要通过命令行添加一些参数.为了方便, 可以将这些常用参数直接写入配置文件中, 避免每次设置.\n将如下几行配置追加到 $ANDROID_AVD_HOME/android11.avd/config.ini 文件中\n123skin.name=1080x1920hw.lcd.density=480hw.keyboard=yes\n\n启动虚拟设备接下来就可以根据配置的设备名称, 启动虚拟设备了.\n12$ cd $ANDROID_SDK_ROOT/emulator$ emulator -avd android11\n这里有个遗留问题是, 虽然我们已经将 emulator 的目录添加到了环境变量中, 但是在任意位置启动时会抛出异常, 解决办法是先 cd 进 emulator 的目录, 然后再启动, 不知道这个问题以后会不会修复\n这样, 我们就成功的在 Mac OS 上创建了一台可以用于调试的 Android 虚拟设备.之后就可以使用 ADB 或者直接拖动 apk 文件到虚拟设备安装应用了.\n\n附注\n由于不同的镜像或 Android API 版本最终能获得的权限不同, 如果需要 root 权限还需要自行测试, 本文使用的示例是经过测试可以获取 root 权限的.\n特定的 Android 9 和任意版本的 Android 11 镜像已经默认支持 ARM 指令集的应用.\n更多详细内容可以参考 Android Studio Emulator相关的文档.\n会有一些诡异的应用无法安装或者无法启动, 需要尝试才能知道.\n\n\n参考资料[1] Install and Create Emulators using AVDMANAGER and SDKMANAGER[2] Android Studio - Command line tools[3] Android Studio - Start the emulator from the command line[4] Support for ARM binaries on Android 9 and 11 system images","dateCreated":"2022-07-13T07:28:13+00:00","dateModified":"2022-08-29T09:05:26+00:00","datePublished":"2022-07-13T07:28:13+00:00","description":"","headline":"在 Mac OS 上创建 Android 虚拟设备","image":[],"mainEntityOfPage":{"@type":"WebPage","@id":"https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"},"publisher":{"@type":"Organization","name":"李瀚翾","sameAs":["https://github.com/lihanx","mailto:lihanx9@163.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/","keywords":"爬虫"}</script>
-    <meta property="og:type" content="blog">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="前言当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器. 使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要">
+<meta property="og:type" content="article">
 <meta property="og:title" content="在 Mac OS 上创建 Android 虚拟设备">
 <meta property="og:url" content="https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/">
 <meta property="og:site_name" content="技术与生活">
+<meta property="og:description" content="前言当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器. 使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-07-13T07:28:13.000Z">
 <meta property="article:modified_time" content="2022-08-29T09:05:26.843Z">
@@ -24,253 +20,142 @@
 <meta name="twitter:card" content="summary">
     
     
+      
         
-    
-    
-        <meta property="og:image" content="https://lihanx.github.io/assets/images/profile.jpg"/>
-    
-    
-    
-    
-    <!--STYLES-->
-    
-<link rel="stylesheet" href="/assets/css/style-xauyfozqtqozcpsrphukridnjkr9dhe8pwadzdb0xqjt4tr2luvsk6bxwf84.min.css">
-
-    <!--STYLES END-->
-    
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZF6GHC927L"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-ZF6GHC927L');
-    </script>
-
-
-    
-
-    
+          <link rel="shortcut icon" href="/images/favicon.ico">
         
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
     
-</head>
+    <!-- title -->
+    <title>在 Mac OS 上创建 Android 虚拟设备</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-    <body>
-        <div id="blog">
-            <!-- Define author's picture -->
-
-
+    <!-- persian styles -->
     
-        
-            
-        
-    
-
-<header id="header" data-behavior="5">
-    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
-    <div class="header-title">
-        <a
-            class="header-title-link"
-            href="/"
-            aria-label=""
-        >
-            技术与生活
-        </a>
-    </div>
-    
-        
-            <a
-                class="header-right-picture "
-                href="#about"
-                aria-label="打开链接: /#about"
-            >
-        
-        
-            <img class="header-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-        </a>
-    
-</header>
-
-            <!-- Define author's picture -->
-
-
-
-        
-    
-
-<nav id="sidebar" data-behavior="5">
-    <div class="sidebar-container">
-        
-            <div class="sidebar-profile">
-                <a
-                    href="/#about"
-                    aria-label="阅读有关作者的更多信息"
-                >
-                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-                </a>
-                <h4 class="sidebar-profile-name">李瀚翾</h4>
-                
-                    <h5 class="sidebar-profile-bio"><p>持续学习, 不断探索</p>
-</h5>
-                
-            </div>
-        
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/"
-                            
-                            rel="noopener"
-                            title="首页"
-                        >
-                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">首页</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-categories"
-                            
-                            rel="noopener"
-                            title="分类"
-                        >
-                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">分类</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-tags"
-                            
-                            rel="noopener"
-                            title="标签"
-                        >
-                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">标签</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="/all-archives"
-                            
-                            rel="noopener"
-                            title="归档"
-                        >
-                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">归档</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="#about"
-                            
-                            rel="noopener"
-                            title="关于"
-                        >
-                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">关于</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-            <ul class="sidebar-buttons">
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="https://github.com/lihanx"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="GitHub"
-                        >
-                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">GitHub</span>
-                    </a>
-            </li>
-            
-                <li class="sidebar-button">
-                    
-                        <a
-                            class="sidebar-button-link "
-                            href="mailto:lihanx9@163.com"
-                            
-                                target="_blank"
-                            
-                            rel="noopener"
-                            title="邮箱"
-                        >
-                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
-                        <span class="sidebar-button-desc">邮箱</span>
-                    </a>
-            </li>
-            
-        </ul>
-        
-    </div>
-</nav>
-
-            
-            <div id="main" data-behavior="5"
-                 class="
-                        hasCoverMetaIn
-                        ">
-                
-<article class="post">
+    <!-- rss -->
     
     
-        <div class="post-header main-content-wrap text-left">
-    
-        <h1 class="post-title">
-            在 Mac OS 上创建 Android 虚拟设备
-        </h1>
-    
-    
-        <div class="post-meta">
-    <time datetime="2022-07-13T07:28:13+00:00">
+	<!-- mathjax -->
 	
-		    2022年 7月 13日
-    	
-    </time>
-    
-        <span>发布在 </span>
+<meta name="generator" content="Hexo 5.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
         
-    <a class="category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
+        <li><a class="icon" aria-label="Previous post" href="/2022/07/20/docker/manage-data-in-docker/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/07/12/astro-photography/2022-07-11-saturn/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&text=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&is_video=false&description=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 Mac OS 上创建 Android 虚拟设备&body=Check out this article: https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&name=在 Mac OS 上创建 Android 虚拟设备&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&t=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-
-    
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-SDK"><span class="toc-number">2.</span> <span class="toc-text">安装 SDK</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">3.</span> <span class="toc-text">设置环境变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Android-SDK-%E7%BB%84%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">安装 Android SDK 组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E5%B9%B6%E5%AE%89%E8%A3%85-Android-%E7%B3%BB%E7%BB%9F"><span class="toc-number">5.</span> <span class="toc-text">选择并安装 Android 系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87"><span class="toc-number">6.</span> <span class="toc-text">创建虚拟设备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%89%8D%E9%85%8D%E7%BD%AE%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">7.</span> <span class="toc-text">提前配置启动参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87"><span class="toc-number">8.</span> <span class="toc-text">启动虚拟设备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E6%B3%A8"><span class="toc-number">9.</span> <span class="toc-text">附注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">10.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+  </span>
 </div>
 
     
-</div>
-
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
     
-    <div class="post-content markdown">
-        <div class="main-content-wrap">
-            
+    <h1 class="posttitle" itemprop="name headline">
+        在 Mac OS 上创建 Android 虚拟设备
+    </h1>
 
 
-            <!-- excerpt -->
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">李瀚翾</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-13T07:28:13.000Z" itemprop="datePublished">2022-07-13</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <a id="more"></a>
+<!-- excerpt -->
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>当我们手边没有实体的调试设备时, 可能会使用第三方厂商的 Android 模拟器, 或者基于 VirtualBox 的 Genymotion 创建虚拟设备.<br>机缘巧合, 我发现了一种新的创建 Android 虚拟设备的方式, 可以通过命令行独立使用 Android Studio 的 Emulator 模拟器.</p>
 <p>使用这种方式创建出来的虚拟设备, 兼容性要比 x86 的 Genymotion 要好, 不需要 Arm Translator 一类的东西, 性能也还不错, 虽然有些诡异的应用还是不能正常运行, 但是也能临时应付一下没有实体设备的场景.</p>
 <p>下面就具体介绍一下安装方式.</p>
@@ -310,329 +195,145 @@
 </ol>
 <p><br/></p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[1] <a target="_blank" rel="noopener" href="https://gist.github.com/mrk-han/66ac1a724456cadf1c93f4218c6060ae">Install and Create Emulators using AVDMANAGER and SDKMANAGER</a><br>[2] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/command-line">Android Studio - Command line tools</a><br>[3] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/run/emulator-commandline">Android Studio - Start the emulator from the command line</a><br>[4] <a target="_blank" rel="noopener" href="https://developer.android.com/studio/releases/emulator#support_for_arm_binaries_on_android_9_and_11_system_images">Support for ARM binaries on Android 9 and 11 system images</a></p>
-        </div>
-    </div>
-    <div id="post-footer" class="post-footer main-content-wrap">
-        
-            <div class="post-footer-tags">
-                <span class="text-color-light text-small">标签</span><br/>
-                
-    <a class="tag tag--primary tag--small t-none-link" href="/tags/%E7%88%AC%E8%99%AB/" rel="tag">爬虫</a>
 
-            </div>
-        
-        
-            <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/20/docker/manage-data-in-docker/"
-                    data-tooltip="Docker 中的数据管理(译)"
-                    aria-label="上一篇: Docker 中的数据管理(译)"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
-                    data-tooltip="土星"
-                    aria-label="下一篇: 土星"
-                >
-                    
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-        
-        
-            
-        
-    </div>
+  </div>
 </article>
 
 
 
-                <footer id="footer" class="main-content-wrap">
-    <span class="copyrights">
-        Copyrights &copy; 2022 李瀚翾. All Rights Reserved.
-    </span>
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/tags/">Tags</a></li>
+         
+          <li><a href="/categories/">Category</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-SDK"><span class="toc-number">2.</span> <span class="toc-text">安装 SDK</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">3.</span> <span class="toc-text">设置环境变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85-Android-SDK-%E7%BB%84%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">安装 Android SDK 组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E5%B9%B6%E5%AE%89%E8%A3%85-Android-%E7%B3%BB%E7%BB%9F"><span class="toc-number">5.</span> <span class="toc-text">选择并安装 Android 系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87"><span class="toc-number">6.</span> <span class="toc-text">创建虚拟设备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8F%90%E5%89%8D%E9%85%8D%E7%BD%AE%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">7.</span> <span class="toc-text">提前配置启动参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87"><span class="toc-number">8.</span> <span class="toc-text">启动虚拟设备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E6%B3%A8"><span class="toc-number">9.</span> <span class="toc-text">附注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="toc-number">10.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&text=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&is_video=false&description=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 Mac OS 上创建 Android 虚拟设备&body=Check out this article: https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&title=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&name=在 Mac OS 上创建 Android 虚拟设备&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/&t=在 Mac OS 上创建 Android 虚拟设备"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2022
+    李瀚翾
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/tags/">Tags</a></li><!--
+     --><!--
+       --><li><a href="/categories/">Category</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
 </footer>
 
-            </div>
-            
-                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
-                    <div class="post-actions-wrap">
-    <nav>
-        <ul class="post-actions post-action-nav">
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/20/docker/manage-data-in-docker/"
-                    data-tooltip="Docker 中的数据管理(译)"
-                    aria-label="上一篇: Docker 中的数据管理(译)"
-                >
-                    
-                        <i class="fa fa-angle-left" aria-hidden="true"></i>
-                        <span class="hide-xs hide-sm text-small icon-ml">上一篇</span>
-                    </a>
-            </li>
-            <li class="post-action">
-                
-                    
-                <a
-                    class="post-action-btn btn btn--default tooltip--top"
-                    href="/2022/07/12/astro-photography/2022-07-11-saturn/"
-                    data-tooltip="土星"
-                    aria-label="下一篇: 土星"
-                >
-                    
-                        <span class="hide-xs hide-sm text-small icon-mr">下一篇</span>
-                        <i class="fa fa-angle-right" aria-hidden="true"></i>
-                    </a>
-            </li>
-        </ul>
-    </nav>
-    <ul class="post-actions post-action-share">
-        <li class="post-action hide-lg hide-md hide-sm">
-            <a
-                class="post-action-btn btn btn--default btn-open-shareoptions"
-                href="#btn-open-shareoptions"
-                aria-label="Share this post"
-            >
-                <i class="fa fa-share-alt" aria-hidden="true"></i>
-            </a>
-        </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Facebook"
-                    aria-label="分享到 Facebook"
-                >
-                    <i class="fab fa-facebook" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Twitter"
-                    aria-label="分享到 Twitter"
-                >
-                    <i class="fab fa-twitter" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-            
-            
-            <li class="post-action hide-xs">
-                <a
-                    class="post-action-btn btn btn--default"
-                    target="new" href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                    title="分享到 Google+"
-                    aria-label="分享到 Google+"
-                >
-                    <i class="fab fa-google-plus" aria-hidden="true"></i>
-                </a>
-            </li>
-        
-        
-            
-        
-        <li class="post-action">
-            
-                <a class="post-action-btn btn btn--default" href="#" aria-label="Back to top">
-            
-                <i class="fa fa-list" aria-hidden="true"></i>
-            </a>
-        </li>
-    </ul>
-</div>
-
-
-                </div>
-                
-    <div id="share-options-bar" class="share-options-bar" data-behavior="5">
-        <i id="btn-close-shareoptions" class="fa fa-times"></i>
-        <ul class="share-options">
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://www.facebook.com/sharer/sharer.php?u=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                        aria-label="分享到 Facebook"
-                    >
-                        <i class="fab fa-facebook" aria-hidden="true"></i><span>分享到 Facebook</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://twitter.com/intent/tweet?text=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                        aria-label="分享到 Twitter"
-                    >
-                        <i class="fab fa-twitter" aria-hidden="true"></i><span>分享到 Twitter</span>
-                    </a>
-                </li>
-            
-                
-                
-                <li class="share-option">
-                    <a
-                        class="share-option-btn"
-                        target="new"
-                        href="https://plus.google.com/share?url=https://lihanx.github.io/2022/07/13/spider/create-an-android-virtual-device-on-macos/"
-                        aria-label="分享到 Google+"
-                    >
-                        <i class="fab fa-google-plus" aria-hidden="true"></i><span>分享到 Google+</span>
-                    </a>
-                </li>
-            
-        </ul>
     </div>
+    <!-- styles -->
 
 
-            
-        </div>
-        
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
 
 
-    
-        
-    
-
-<div id="about">
-    <div id="about-card">
-        <div id="about-btn-close">
-            <i class="fa fa-times"></i>
-        </div>
-        
-            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="作者的图片"/>
-        
-            <h4 id="about-card-name">李瀚翾</h4>
-        
-            <div id="about-card-bio"><p>持续学习, 不断探索</p>
-</div>
-        
-        
-            <div id="about-card-job">
-                <i class="fa fa-briefcase"></i>
-                <br/>
-                <p>Python 开发工程师</p>
-
-            </div>
-        
-        
-    </div>
-</div>
-
-        
-        
-<div id="cover" style="background-image:url('/assets/images/cover.jpg');"></div>
-        <!--SCRIPTS-->
-
-<script src="/assets/js/script-pwcx44shgfco2srkcnhh8knfc88726ymos4auiuwmqt6fcetpnkbnhqtt4ce.min.js"></script>
-
-<!--SCRIPTS END-->
-
-
-    
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
 
 
 
 
-    <script type="text/x-mathjax-config">
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+<script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
             inlineMath: [ ["$","$"], ["\\(","\\)"] ],
