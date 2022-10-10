@@ -411,9 +411,9 @@
       
         <tags>
             
-            <tag> Python </tag>
-            
             <tag> Scrapy </tag>
+            
+            <tag> Python </tag>
             
         </tags>
       
@@ -467,9 +467,9 @@
       
         <tags>
             
-            <tag> Asyncio </tag>
-            
             <tag> Python </tag>
+            
+            <tag> Asyncio </tag>
             
         </tags>
       
@@ -596,9 +596,9 @@
       
         <tags>
             
-            <tag> Asyncio </tag>
-            
             <tag> Python </tag>
+            
+            <tag> Asyncio </tag>
             
             <tag> Gevent </tag>
             
