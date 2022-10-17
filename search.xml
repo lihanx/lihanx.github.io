@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>M42/M43 猎户座星云</title>
+      <link href="/2022/10/17/astro-photography/2022-10-17-messier-42/"/>
+      <url>/2022/10/17/astro-photography/2022-10-17-messier-42/</url>
+      
+        <content type="html"><![CDATA[<a id="more"></a><!-- excerpt --><p><img src="kstars.jpeg" alt=""></p><p><br/></p><p><img src="raw_sample.jpeg" alt=""></p><p><br/></p><p><img src="m42-1.jpeg" alt=""></p><p><br/></p><p><img src="m42-2.jpeg" alt=""></p><p>主镜: SkyRover 80 APO Pro<br>赤道仪: EXOS-2 + Onstep<br>主控: Astroberry(Raspberry Pi) + Kstars<br>相机: Nikon D700<br>时间: 2022-10-17 凌晨<br>地点: 南阳台<br>总曝光时长: 约 5 分钟<br>ISO: 100/400/800/1000<br>光污染等级: 6 级</p><blockquote><ol><li>拆掉 EXOS-2 原厂的 Bresser GOTO 后，更换为 Onstep 套件  </li><li>使用 Astroberry 进行 Onstep 和 D700 的控制  </li><li>使用 Kstars + Ekos 客户端连接 Astroberry 的热点进行远程控制  </li><li>经过测试发现 Onstep 必须每次使用手机 APP 初始化 Park Position 和 时间地点，电机才可以启动  </li><li>搭建好整套系统后第一次使用，在阳台的观测窗口又比较短，比较手忙脚乱  </li><li>虽然存在一些小问题，但是整体的使用体验还是非常不错的  </li><li>总曝光时长比较短，所以拍得不是很完整，只能说勉强拍到  </li><li>下一次好天气出摊，争取把曝光时长增加到 1 小时以上  </li></ol></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>准满月(十四)</title>
       <link href="/2022/09/10/astro-photography/2022-09-09-the-full-moon-at-mid-autumn-festival-night/"/>
       <url>/2022/09/10/astro-photography/2022-09-09-the-full-moon-at-mid-autumn-festival-night/</url>
@@ -594,9 +619,9 @@
       
         <tags>
             
-            <tag> Garbage Collection </tag>
-            
             <tag> Compilers </tag>
+            
+            <tag> Garbage Collection </tag>
             
         </tags>
       
