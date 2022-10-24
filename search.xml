@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>M42 猎户座星云(第二次拍摄)</title>
+      <link href="/2022/10/22/astro-photography/2022-10-23-messier-42/"/>
+      <url>/2022/10/22/astro-photography/2022-10-23-messier-42/</url>
+      
+        <content type="html"><![CDATA[<a id="more"></a><!-- excerpt --><p><img src="m42.jpeg" alt=""></p><p>主镜: SkyRover 80 APO Pro<br>赤道仪: EXOS-2 + Onstep<br>主控: Astroberry(Raspberry Pi) + Kstars<br>相机: Nikon D700<br>时间: 2022-10-23 凌晨<br>地点: 南阳台<br>总曝光时长: 30s * 30<br>ISO: 1600<br>光污染等级: 6 级</p><blockquote><ol><li>这一次拍摄延长了单张的曝光时间；</li><li>调整了相机视场的角度，便于使用 Mount Control 控制微调；</li><li>参考长曝光时星点的拖线方向，对极轴；测试 KStars 对极轴功能未果；</li><li>由于提前熟悉了设备，所以拍摄过程较流畅，没有出现临时的意外情况；</li><li>使用 DeepSkyStacker 处理后，可以看到暗部的细节比上次多了一些，但仍然不是很完整；</li><li>下一次继续采用相同的方案拍摄，提高感光或延长曝光时长，希望获取更多暗部的细节；</li><li>另外发现现在单反在 PTP 模式、Force Bulb = OFF 的情况下，最长曝光时间被限制在 30s，还需要进一步调试和查阅文档；</li></ol></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>M42/M43 猎户座星云</title>
       <link href="/2022/10/17/astro-photography/2022-10-17-messier-42/"/>
       <url>/2022/10/17/astro-photography/2022-10-17-messier-42/</url>
@@ -359,9 +384,9 @@
       
         <tags>
             
-            <tag> 天文摄影 </tag>
-            
             <tag> 翻译 </tag>
+            
+            <tag> 天文摄影 </tag>
             
         </tags>
       
@@ -619,9 +644,9 @@
       
         <tags>
             
-            <tag> Garbage Collection </tag>
-            
             <tag> Compilers </tag>
+            
+            <tag> Garbage Collection </tag>
             
         </tags>
       
