@@ -4,6 +4,56 @@
   
     
     <entry>
+      <title>NGC 2237 - Rosette Nebula（玫瑰星云）</title>
+      <link href="/2022/11/28/astro-photography/2022-11-29-ngc-2237-rosette-nebula/"/>
+      <url>/2022/11/28/astro-photography/2022-11-29-ngc-2237-rosette-nebula/</url>
+      
+        <content type="html"><![CDATA[<a id="more"></a><!-- excerpt --><p><img src="ngc2237.jpg" alt=""></p><p><br/></p><p><img src="ngc2237-versus.jpg" alt=""></p><p>主镜: SkyRover 80 APO Pro<br>赤道仪: EXOS-2 + Onstep<br>主控: Astroberry(Raspberry Pi) + Kstars<br>相机: Nikon D700<br>滤镜: UHC 光害滤镜<br>时间: 2022-11-29 凌晨<br>地点: 南阳台<br>单张: 30s iso5000<br>曝光总时长: 42min</p><blockquote><ol><li>这一次最大的收获，是参照《从 0 到 1 拍星空（天文摄影与后期处理全指南）》对图片的红色通道进行了增强</li><li>图 1 是最终的效果，图 2 是原图与处理后的图片对比</li><li>等完全熟悉手里的这一套系统之后，也许会整理一下踩坑记录</li></ol></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>M42 猎户座星云(第四次拍摄)</title>
+      <link href="/2022/11/15/astro-photography/2022-11-16-messier-42-the-forth-edition/"/>
+      <url>/2022/11/15/astro-photography/2022-11-16-messier-42-the-forth-edition/</url>
+      
+        <content type="html"><![CDATA[<a id="more"></a><!-- excerpt --><p><img src="m42.jpg" alt=""></p><p>主镜: SkyRover 80 APO Pro<br>赤道仪: EXOS-2 + Onstep<br>主控: Astroberry(Raspberry Pi) + Kstars<br>相机: Nikon D700<br>时间: 2022-11-16 凌晨<br>地点: 南阳台<br>单张: 30s iso5000</p><blockquote><ol><li>据说横纹是 D700 CMOS 缺陷导致的，高 ISO 情况下较亮的点会导致横跨整个画面的横纹</li><li>今天天气很好，大气通透，效果比之前几次拍摄好很多</li><li>核心区域过曝的问题目前还没有解决，之后需要继续学习 HDR 处理</li></ol></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>M42 猎户座星云(第二次拍摄)</title>
       <link href="/2022/10/22/astro-photography/2022-10-23-messier-42/"/>
       <url>/2022/10/22/astro-photography/2022-10-23-messier-42/</url>
@@ -644,9 +694,9 @@
       
         <tags>
             
-            <tag> Compilers </tag>
-            
             <tag> Garbage Collection </tag>
+            
+            <tag> Compilers </tag>
             
         </tags>
       
