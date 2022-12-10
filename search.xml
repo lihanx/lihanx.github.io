@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>NGC 2237 - Rosette Nebula（玫瑰星云）（第二次拍摄）</title>
+      <link href="/2022/12/03/astro-photography/2022-12-04-ngc2237-rosette-nebula/"/>
+      <url>/2022/12/03/astro-photography/2022-12-04-ngc2237-rosette-nebula/</url>
+      
+        <content type="html"><![CDATA[<a id="more"></a><!-- excerpt --><p><img src="ngc2237.jpg" alt=""></p><p><br/></p><p>主镜: SkyRover 80 APO Pro<br>赤道仪: EXOS-2 + Onstep<br>主控: Astroberry(Raspberry Pi) + Kstars<br>相机: Nikon D700<br>滤镜: UHC 光害滤镜<br>时间: 2022-12-04 凌晨<br>地点: 南阳台<br>单张: 30s iso5000<br>曝光总时长: 90min</p><blockquote><ol><li>这一次没有进行新的尝试，只是继续对 NGC2237 进行拍摄，积累曝光。现在累计的曝光时间达到 90 min，经过后期处理，可以明显看出目标主体变得更加饱满</li></ol></blockquote>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>NGC 2237 - Rosette Nebula（玫瑰星云）</title>
       <link href="/2022/11/28/astro-photography/2022-11-29-ngc-2237-rosette-nebula/"/>
       <url>/2022/11/28/astro-photography/2022-11-29-ngc-2237-rosette-nebula/</url>
@@ -355,9 +380,9 @@
       
         <tags>
             
-            <tag> Golang </tag>
-            
             <tag> 翻译 </tag>
+            
+            <tag> Golang </tag>
             
         </tags>
       
@@ -382,9 +407,9 @@
       
         <tags>
             
-            <tag> Golang </tag>
-            
             <tag> 翻译 </tag>
+            
+            <tag> Golang </tag>
             
         </tags>
       
@@ -434,9 +459,9 @@
       
         <tags>
             
-            <tag> 翻译 </tag>
-            
             <tag> 天文摄影 </tag>
+            
+            <tag> 翻译 </tag>
             
         </tags>
       
