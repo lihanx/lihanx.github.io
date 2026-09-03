@@ -14,7 +14,7 @@
 <meta property="og:description" content="问题在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为： 12import Nav from &quot;.&#x2F;_partial&#x2F;Nav&quot;;import PostRepository from &quot;..&#x2F;Re">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-07-26T05:57:46.000Z">
-<meta property="article:modified_time" content="2022-08-29T09:05:26.842Z">
+<meta property="article:modified_time" content="2026-09-03T09:16:53.182Z">
 <meta property="article:author" content="李瀚翾">
 <meta property="article:tag" content="React">
 <meta property="article:tag" content="Create-React-App">
@@ -40,6 +40,13 @@
     
     <!-- title -->
     <title>在 React CRA 项目中使用 Alias 简化模块导入</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -51,24 +58,24 @@
     
 	<!-- mathjax -->
 	
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body class="max-width mx-auto px3 ltr">    
       <div id="header-post">
-  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
   <span id="menu">
     <span id="nav">
       <ul>
         <!--
        --><li><a href="/">Home</a></li><!--
      --><!--
-       --><li><a href="/tags/">Tags</a></li><!--
+       --><li><a href="/about/">About</a></li><!--
      --><!--
-       --><li><a href="/categories/">Category</a></li><!--
+       --><li><a href="/archives/">Writing</a></li><!--
      --><!--
-       --><li><a href="/search/">Search</a></li><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
      -->
       </ul>
     </span>
@@ -76,13 +83,13 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" aria-label="Previous post" href="/2022/08/29/astro-photography/2022-08-27-the-milky-way-at-a-glance/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/29/astro-photography/2022-08-27-the-milky-way-at-a-glance/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" aria-label="Next post" href="/2022/07/20/docker/manage-data-in-docker/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Next post" href="/2022/07/20/docker/manage-data-in-docker/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
-        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
-        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
       </ul>
       <span id="i-prev" class="info" style="display:none;">Previous post</span>
       <span id="i-next" class="info" style="display:none;">Next post</span>
@@ -96,7 +103,7 @@
   <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&text=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&is_video=false&description=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=在 React CRA 项目中使用 Alias 简化模块导入&body=Check out this article: https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 React CRA 项目中使用 Alias 简化模块导入&body=Check out this article: https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
@@ -106,32 +113,35 @@
 </ul>
 
     </div>
-    <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">解决方法</span></a></li></ol>
-    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">解决方法</span></a></li></ol>
+      </div>
+    
   </span>
 </div>
 
     
-    <div class="content index py4">
+    <div class="content index py4 ">
         
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
   <header>
     
-    <h1 class="posttitle" itemprop="name headline">
+    <h1 class="posttitle p-name" itemprop="name headline">
         在 React CRA 项目中使用 Alias 简化模块导入
     </h1>
 
 
 
     <div class="meta">
-      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
-        <span itemprop="name">李瀚翾</span>
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">李瀚翾</span>
       </span>
       
     <div class="postdate">
       
-        <time datetime="2022-07-26T05:57:46.000Z" itemprop="datePublished">2022-07-26</time>
+        <time datetime="2022-07-26T05:57:46.000Z" class="dt-published" itemprop="datePublished">2022-07-26</time>
         
       
     </div>
@@ -139,15 +149,15 @@
 
       
     <div class="article-category">
-        <i class="fas fa-archive"></i>
+        <i class="fa-solid fa-archive"></i>
         <a class="category-link" href="/categories/React/">React</a>
     </div>
 
 
       
     <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link-link" href="/tags/Create-React-App/" rel="tag">Create-React-App</a>, <a class="tag-link-link" href="/tags/Import-Path-Alias/" rel="tag">Import Path Alias</a>, <a class="tag-link-link" href="/tags/React/" rel="tag">React</a>
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Create-React-App/" rel="tag">Create-React-App</a>, <a class="p-category" href="/tags/Import-Path-Alias/" rel="tag">Import Path Alias</a>, <a class="p-category" href="/tags/React/" rel="tag">React</a>
     </div>
 
 
@@ -155,14 +165,14 @@
   </header>
   
 
-  <div class="content" itemprop="articleBody">
-    <a id="more"></a>
+  <div class="content e-content" itemprop="articleBody">
+    <span id="more"></span>
 <!-- excerpt -->
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在使用 Create-React-App (CRA) 工具创建 React 项目后，我们常常会按照自己的风格，在 src 目录中组织目录结构。有时简单的项目，目录层级只有 1 级或者 2 级，那么在导入依赖组件时，可以写为：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Nav <span class="keyword">from</span> <span class="string">&quot;./_partial/Nav&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> PostRepository <span class="keyword">from</span> <span class="string">&quot;../Repository/PostRepository&quot;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">Nav</span> <span class="keyword">from</span> <span class="string">&quot;./_partial/Nav&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="title class_">PostRepository</span> <span class="keyword">from</span> <span class="string">&quot;../Repository/PostRepository&quot;</span>;</span><br></pre></td></tr></table></figure>
 <p>这样看起来似乎没什么问题。</p>
 <p>但是当项目变得复杂后，要么，所有的文件都平铺在一个目录中；要么，就会出现多级嵌套的目录结构，导入模块就可能演变成：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Footer <span class="keyword">from</span> <span class="string">&quot;../../../component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">Footer</span> <span class="keyword">from</span> <span class="string">&quot;../../../component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
 <p>导入模块变得越来越复杂，而问题似乎又不可避免。</p>
 <p>那么有没有什么方式可以让我们简化导入语句，同时又不影响对依赖模块的查找呢？</p>
 <p>这就是 alias 可以发挥作用的时候了。</p>
@@ -176,12 +186,12 @@
 </blockquote>
 <p>执行完成后，就可以在项目的根目录下看到 config 子目录了。</p>
 <p>然后打开 <code>config/webpack.config.js</code> 文件，在变量声明区域追加一行</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> basePath = path.resolve(__dirname, <span class="string">&quot;../src&quot;</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> basePath = path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;../src&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p><em>通常 path 模块已经被导入了，不过最好还是再进行一下确认</em></p>
 <p>然后我们在向外暴露的函数中，找到最后 return 的巨大 object 里面的 <code>resolve.alias</code> 一项，向里面添加一组键值对。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">alias: &#123;</span><br><span class="line">    <span class="string">&quot;~&quot;</span>: basePath,  <span class="comment">// 添加这一行</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="attr">alias</span>: &#123;</span><br><span class="line">    <span class="string">&quot;~&quot;</span>: basePath,  <span class="comment">// 添加这一行</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 <p>修改后，就可以使用 <code>~</code> 作为前缀去导入内部组件了。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Footer <span class="keyword">from</span> <span class="string">&quot;~/component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">Footer</span> <span class="keyword">from</span> <span class="string">&quot;~/component/_partial/Footer&quot;</span>;</span><br></pre></td></tr></table></figure>
 <p>上述的修改，会让 webpack 在打包时，使用 <code>basePath</code> 的值（我这里使用的是 src 目录的绝对路径）替换 <code>~</code> 符号，然后使用绝对路径去寻找依赖的组件。</p>
 <p>这样就解决了导入路径繁琐的问题。</p>
 
@@ -196,21 +206,24 @@
 
     <div id="nav-footer" style="display: none">
       <ul>
-         
+        
           <li><a href="/">Home</a></li>
-         
-          <li><a href="/tags/">Tags</a></li>
-         
-          <li><a href="/categories/">Category</a></li>
-         
-          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
         
       </ul>
     </div>
 
-    <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">解决方法</span></a></li></ol>
-    </div>
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">2.</span> <span class="toc-text">解决方法</span></a></li></ol>
+      </div>
+    
 
     <div id="share-footer" style="display: none">
       <ul>
@@ -218,7 +231,7 @@
   <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&text=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&is_video=false&description=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=在 React CRA 项目中使用 Alias 简化模块导入&body=Check out this article: https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=在 React CRA 项目中使用 Alias 简化模块导入&body=Check out this article: https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2022/07/26/react/use-path-alias-with-create-react-app/&title=在 React CRA 项目中使用 Alias 简化模块导入"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
@@ -230,10 +243,12 @@
     </div>
 
     <div id="actions-footer">
-        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
-        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
-        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
-        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
     </div>
 
   </div>
@@ -245,7 +260,7 @@
     Copyright &copy;
     
     
-    2016-2022
+    2016-2026
     李瀚翾
   </div>
   <div class="footer-right">
@@ -254,11 +269,11 @@
         <!--
        --><li><a href="/">Home</a></li><!--
      --><!--
-       --><li><a href="/tags/">Tags</a></li><!--
+       --><li><a href="/about/">About</a></li><!--
      --><!--
-       --><li><a href="/categories/">Category</a></li><!--
+       --><li><a href="/archives/">Writing</a></li><!--
      --><!--
-       --><li><a href="/search/">Search</a></li><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
      -->
       </ul>
     </nav>
@@ -270,12 +285,12 @@
 
 
 
-  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
 
 
     <!-- jquery -->
- 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
 
 
 
@@ -283,14 +298,14 @@
 <!-- clipboard -->
 
   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
   <script type="text/javascript">
   $(function() {
     // copy-btn HTML
     var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
-    btn += '<i class="far fa-clone"></i>';
-    btn += '</span>'; 
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
     // mount it!
     $(".highlight table").before(btn);
     var clip = new ClipboardJS('.btn-copy', {
@@ -310,13 +325,9 @@
 
 <!-- search -->
 
-<!-- Google Analytics -->
-
 <!-- Baidu Analytics -->
 
 <!-- Cloudflare Analytics -->
-
-<!-- Umami Analytics -->
 
 <!-- Disqus Comments -->
 

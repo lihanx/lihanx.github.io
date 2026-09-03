@@ -16,7 +16,7 @@
 <meta property="og:image" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/1.PNG">
 <meta property="og:image" content="https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/1.PNG">
 <meta property="article:published_time" content="2019-02-12T16:00:00.000Z">
-<meta property="article:modified_time" content="2020-12-08T15:08:54.114Z">
+<meta property="article:modified_time" content="2026-09-03T09:16:53.182Z">
 <meta property="article:author" content="李瀚翾">
 <meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
@@ -41,6 +41,13 @@
     
     <!-- title -->
     <title>用户级线程 与 内核级线程</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -52,24 +59,24 @@
     
 	<!-- mathjax -->
 	
-<meta name="generator" content="Hexo 5.2.0"></head>
+<meta name="generator" content="Hexo 5.4.2"></head>
 
 <body class="max-width mx-auto px3 ltr">    
       <div id="header-post">
-  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
-  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
   <span id="menu">
     <span id="nav">
       <ul>
         <!--
        --><li><a href="/">Home</a></li><!--
      --><!--
-       --><li><a href="/tags/">Tags</a></li><!--
+       --><li><a href="/about/">About</a></li><!--
      --><!--
-       --><li><a href="/categories/">Category</a></li><!--
+       --><li><a href="/archives/">Writing</a></li><!--
      --><!--
-       --><li><a href="/search/">Search</a></li><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
      -->
       </ul>
     </span>
@@ -77,11 +84,11 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" aria-label="Previous post" href="/2019/07/05/python/asyncio-vs-gevent/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Previous post" href="/2019/07/05/python/asyncio-vs-gevent/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
-        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
       </ul>
       <span id="i-prev" class="info" style="display:none;">Previous post</span>
       <span id="i-next" class="info" style="display:none;">Next post</span>
@@ -95,7 +102,7 @@
   <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&text=用户级线程 与 内核级线程"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&is_video=false&description=用户级线程 与 内核级线程"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
@@ -105,32 +112,35 @@
 </ul>
 
     </div>
-    <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
-    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
   </span>
 </div>
 
     
-    <div class="content index py4">
+    <div class="content index py4 ">
         
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
   <header>
     
-    <h1 class="posttitle" itemprop="name headline">
+    <h1 class="posttitle p-name" itemprop="name headline">
         用户级线程 与 内核级线程
     </h1>
 
 
 
     <div class="meta">
-      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
-        <span itemprop="name">李瀚翾</span>
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">李瀚翾</span>
       </span>
       
     <div class="postdate">
       
-        <time datetime="2019-02-12T16:00:00.000Z" itemprop="datePublished">2019-02-13</time>
+        <time datetime="2019-02-12T16:00:00.000Z" class="dt-published" itemprop="datePublished">2019-02-13</time>
         
       
     </div>
@@ -138,15 +148,15 @@
 
       
     <div class="article-category">
-        <i class="fas fa-archive"></i>
+        <i class="fa-solid fa-archive"></i>
         <a class="category-link" href="/categories/Linux/">Linux</a>
     </div>
 
 
       
     <div class="article-tag">
-        <i class="fas fa-tag"></i>
-        <a class="tag-link-link" href="/tags/Linux/" rel="tag">Linux</a>
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Linux/" rel="tag">Linux</a>
     </div>
 
 
@@ -154,8 +164,8 @@
   </header>
   
 
-  <div class="content" itemprop="articleBody">
-    <a id="more"></a>
+  <div class="content e-content" itemprop="articleBody">
+    <span id="more"></span>
 <!-- excerpt -->
 <blockquote>
 <p>原文: <a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/user-level-threads-and-kernel-level-threads">user-level-threads-and-kernel-level-threads [Alex Onsman] - 10th Oct, 2018</a></p>
@@ -225,21 +235,24 @@
 
     <div id="nav-footer" style="display: none">
       <ul>
-         
+        
           <li><a href="/">Home</a></li>
-         
-          <li><a href="/tags/">Tags</a></li>
-         
-          <li><a href="/categories/">Category</a></li>
-         
-          <li><a href="/search/">Search</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
         
       </ul>
     </div>
 
-    <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
-    </div>
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87%E7%BF%BB%E8%AF%91"><span class="toc-number">2.</span> <span class="toc-text">原文翻译</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B-User-Level-Threads"><span class="toc-number">2.1.</span> <span class="toc-text">用户级线程(User-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">用户级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">用户级线程的缺点：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B-Kernel-Level-Threads"><span class="toc-number">2.2.</span> <span class="toc-text">内核级线程(Kernel-Level Threads)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.1.</span> <span class="toc-text">内核级线程的优点：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">2.2.2.</span> <span class="toc-text">内核级线程的缺点：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8E%9F%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">原文</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Level-Threads"><span class="toc-number">3.1.</span> <span class="toc-text">User - Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-User-Level-Threads"><span class="toc-number">3.1.1.</span> <span class="toc-text">Advantages of User-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-User-Level-Threads"><span class="toc-number">3.1.2.</span> <span class="toc-text">Disadvantages of User-Level Threads</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Kernel-Level-Threads"><span class="toc-number">3.2.</span> <span class="toc-text">Kernel-Level Threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Advantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.1.</span> <span class="toc-text">Advantages of Kernel-Level Threads</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Disadvantages-of-Kernel-Level-Threads"><span class="toc-number">3.2.2.</span> <span class="toc-text">Disadvantages of Kernel-Level Threads</span></a></li></ol></li></ol></li></ol>
+      </div>
+    
 
     <div id="share-footer" style="display: none">
       <ul>
@@ -247,7 +260,7 @@
   <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&text=用户级线程 与 内核级线程"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&is_video=false&description=用户级线程 与 内核级线程"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=用户级线程 与 内核级线程&body=Check out this article: https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://lihanx.github.io/2019/02/12/linux/user-level-threads-and-kernel-level-threads/&title=用户级线程 与 内核级线程"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
@@ -259,10 +272,12 @@
     </div>
 
     <div id="actions-footer">
-        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
-        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
-        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
-        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
     </div>
 
   </div>
@@ -274,7 +289,7 @@
     Copyright &copy;
     
     
-    2016-2022
+    2016-2026
     李瀚翾
   </div>
   <div class="footer-right">
@@ -283,11 +298,11 @@
         <!--
        --><li><a href="/">Home</a></li><!--
      --><!--
-       --><li><a href="/tags/">Tags</a></li><!--
+       --><li><a href="/about/">About</a></li><!--
      --><!--
-       --><li><a href="/categories/">Category</a></li><!--
+       --><li><a href="/archives/">Writing</a></li><!--
      --><!--
-       --><li><a href="/search/">Search</a></li><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
      -->
       </ul>
     </nav>
@@ -299,12 +314,12 @@
 
 
 
-  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
 
 
     <!-- jquery -->
- 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
 
 
 
@@ -312,14 +327,14 @@
 <!-- clipboard -->
 
   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
   <script type="text/javascript">
   $(function() {
     // copy-btn HTML
     var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
-    btn += '<i class="far fa-clone"></i>';
-    btn += '</span>'; 
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
     // mount it!
     $(".highlight table").before(btn);
     var clip = new ClipboardJS('.btn-copy', {
@@ -339,13 +354,9 @@
 
 <!-- search -->
 
-<!-- Google Analytics -->
-
 <!-- Baidu Analytics -->
 
 <!-- Cloudflare Analytics -->
-
-<!-- Umami Analytics -->
 
 <!-- Disqus Comments -->
 
