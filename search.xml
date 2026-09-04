@@ -4,25 +4,48 @@
   
     
     <entry>
-      <title>跟着实例学习 React Hooks</title>
-      <link href="/2023/01/17/react/hooks-overview/"/>
-      <url>/2023/01/17/react/hooks-overview/</url>
+      <title>月全食</title>
+      <link href="/2025/09/07/astro-photography/2025-09-08-total-lunar-eclipse/"/>
+      <url>/2025/09/07/astro-photography/2025-09-08-total-lunar-eclipse/</url>
       
-        <content type="html"><![CDATA[<span id="more"></span><!-- excerpt --><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文根据 <a href="https://reactjs.org/docs/hooks-reference.html">React - Hooks Reference</a> 对 React 提供的 Hooks API 以及相应的代码实例进行总结，以供查阅。</p><p><br/></p><h2 id="Hooks-总览"><a href="#Hooks-总览" class="headerlink" title="Hooks 总览"></a>Hooks 总览</h2><ul><li>基础 Hooks<ul><li><code>useState</code></li><li><code>useEffect</code></li><li><code>useContext</code></li></ul></li><li>附加 Hooks<ul><li><code>useReducer</code></li><li><code>useCallback</code></li><li><code>useMemo</code></li><li><code>useRef</code></li><li><code>useImperativeHandle</code></li><li><code>useLayoutEffect</code></li><li><code>useDebugValue</code></li><li><code>useDeferredValue</code></li><li><code>useTransition</code></li><li><code>useId</code></li></ul></li></ul><p><br/></p><h2 id="基础-Hooks-实例"><a href="#基础-Hooks-实例" class="headerlink" title="基础 Hooks 实例"></a>基础 Hooks 实例</h2><h3 id="useState"><a href="#useState" class="headerlink" title="useState"></a><code>useState</code></h3><p><code>useState</code> 可以用于状态的初始化和状态的更新。在实际使用中，有以下三种场景：</p><ul><li>根据给定的常值，对状态进行更新</li><li>根据函数计算值，对状态进行更新</li><li>状态的惰性初始化</li></ul>]]></content>
+        <content type="html"><![CDATA[<span id="more"></span><!-- excerpt --><p>月食过程：</p><img src="/2025/09/07/astro-photography/2025-09-08-total-lunar-eclipse/partial-phase.jpg" class="" title="月食过程"><p><br/></p><p>红月：</p><img src="/2025/09/07/astro-photography/2025-09-08-total-lunar-eclipse/totality.jpg" class="" title="月全食红月"><p>主镜: Celestron 90 SLT<br>相机: Fujifilm X-H1<br>时间: 2025-09-08 凌晨<br>地点: 市郊公园</p>]]></content>
       
       
       <categories>
           
-          <category> React </category>
+          <category> 天文摄影 </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> React </tag>
+            <tag> 天文摄影 </tag>
             
-            <tag> Hooks </tag>
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>北美洲星云</title>
+      <link href="/2025/05/25/astro-photography/2025-05-26-north-america-nebula/"/>
+      <url>/2025/05/25/astro-photography/2025-05-26-north-america-nebula/</url>
+      
+        <content type="html"><![CDATA[<span id="more"></span><!-- excerpt --><img src="/2025/05/25/astro-photography/2025-05-26-north-america-nebula/north-america-nebula.jpg" class="" title="北美洲星云"><p>主镜: SkyRover 80 APO Pro<br>赤道仪: Umi17 Lite（小小熊）<br>相机: Nikon D5300（BCF 改机）<br>时间: 2025-05-26<br>地点: 市郊民宅</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 天文摄影 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 天文摄影 </tag>
             
         </tags>
       
